@@ -11,12 +11,22 @@ import numpy as np
 #ノートパソコンで研究するとき
 path = "D:\Sotsuken\Sotsuken_repo./sample/incision_1.jpg"
 
+def review(img, weight):#16区画の評価(2値化された画像を想定)+重みづけ
+	global point
+	point = 0
+	tmp_array = img.flatten()#一次元配列に変換
+	
+	for pixel in tmp_array:
+		if( pixel == 0 ):
+			point += 1
+			
+	return point * weight
 
 def separate(img):#16区画に分ける
 	global list_sepa, width, height
 	global sepa1, sepa2, sepa3, sepa4, sepa5, sepa6, sepa7, sepa8
 	global sepa9, sepa10, sepa11, sepa12, sepa13, sepa14, sepa15, sepa16
-	#list_sepa = []
+	list_sepa = []
 	width = int(img.shape[0] * 25 / 100)#１区画の幅の大きさ
 	height = int(img.shape[1] * 25 / 100)#１区画の高さ
 	
@@ -37,7 +47,26 @@ def separate(img):#16区画に分ける
 	sepa15 = img[(3)*width : 4* width, (2)*height: 3* height]
 	sepa16 = img[(3)*width : 4* width, (3)*height: 4* height]
 	
-	cv.imshow("separate_"+ str(1), sepa1)
+	list_sepa.append(sepa1)
+	list_sepa.append(sepa2)
+	list_sepa.append(sepa3)
+	list_sepa.append(sepa4)
+	list_sepa.append(sepa5)
+	list_sepa.append(sepa6)
+	list_sepa.append(sepa7)
+	list_sepa.append(sepa8)
+	list_sepa.append(sepa9)
+	list_sepa.append(sepa10)
+	list_sepa.append(sepa11)
+	list_sepa.append(sepa12)
+	list_sepa.append(sepa13)
+	list_sepa.append(sepa14)
+	list_sepa.append(sepa15)
+	list_sepa.append(sepa16)
+	
+	
+	#cv.imshow("separate_"+ str(10), sepa10)
+	#cv.imshow("separate_"+ str(2), sepa2)
 	#cv.imshow("separate_"+ str(2), img[(0)*width : 1* width, (1)*height: 2* height])
 	#cv.imshow("separate_"+ str(3), img[(0)*width : 1* width, (2)*height: 3* height])
 	#cv.imshow("separate_"+ str(4), img[(0)*width : 1* width, (3)*height: 4* height])
@@ -63,7 +92,8 @@ def separate(img):#16区画に分ける
 
 def find_rect(img):#グラフカットのための長方形を決定するための関数
 	global tmp_img, width, height#画像処理のための一時的な保管場所
-	global tmp_img_re
+	global tmp_img_re, list_sepa 
+	global point_dict
 	
 	#パラメータ
 	width = img.shape[0]
@@ -97,12 +127,35 @@ def find_rect(img):#グラフカットのための長方形を決定するため
 	#トリミングした画素を16区画に分ける=sepa1~sepa16に画像のデータが入る
 	separate(tmp_img_re)
 	
+	count = 1
+	point_dict = {} #point_dictを初期化
+	for d in list_sepa:
+		if (count == 6 or count == 7 or count == 10 or count ==11):
+			point = review(d, 4)
+			point_dict[count] = point
+			print(str(count)+ " : " + str(point))
+			count += 1
+			
+		else:
+			point = review(d, 1)
+			point_dict[count] = point
+			print(str(count)+ " : " + str(point))
+			count += 1
+	
+	#pointと画素の番号を辞書型で保存
+	sortedDict = sorted(point_dict.items(), key=lambda x:x[1], reverse=True)#list型
+	print(point_dict)
+	
+	cv.imshow("Most", list_sepa[sortedDict[0][0] - 1])
+	cv.imshow("Second", list_sepa[sortedDict[1][0] - 1])
+	
 
 
 
 if __name__ == '__main__':
 		img = cv.imread(path)
 		find_rect(img)
-		cv.imshow("incision1",img)
-		cv.imshow("incision2",tmp_img)
+		#cv.imshow("incision1",img)
+		#cv.imshow("incision2",tmp_img)
+		#cv.imshow("incision2",tmp_img_re)
 		cv.waitKey()
