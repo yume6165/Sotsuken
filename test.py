@@ -11,6 +11,8 @@ import numpy as np
 #ノートパソコンで研究するとき
 path = "D:\Sotsuken\Sotsuken_repo./sample/incision_1.jpg"
 
+N = 1000
+
 def review(img, weight):#16区画の評価(2値化された画像を想定)+重みづけ
 	global point
 	point = 0
@@ -90,10 +92,10 @@ def separate(img):#16区画に分ける
 	#		
 
 
-def find_rect(img):#グラフカットのための長方形を決定するための関数
-	global tmp_img, width, height#画像処理のための一時的な保管場所
-	global tmp_img_re, list_sepa 
-	global point_dict
+def find_gravity(img):#グラフカットのための長方形を決定するための関数
+	global tmp_img, width, height, x1, x2, y1, y2, N#画像処理のための一時的な保管場所
+	global tmp_img_re, list_sepa
+	global point_dict, point1, point2, g_point, tmp_x, tmp_y
 	
 	#パラメータ
 	width = img.shape[0]
@@ -146,16 +148,45 @@ def find_rect(img):#グラフカットのための長方形を決定するため
 	sortedDict = sorted(point_dict.items(), key=lambda x:x[1], reverse=True)#list型
 	print(point_dict)
 	
-	cv.imshow("Most", list_sepa[sortedDict[0][0] - 1])
-	cv.imshow("Second", list_sepa[sortedDict[1][0] - 1])
+	#cv.imshow("Most", list_sepa[sortedDict[0][0] - 1])
+	#cv.imshow("Second", list_sepa[sortedDict[1][0] - 1])
+	
+	
+	#元画像での区画中心の座標を計算
+	#ここの時点で一区画の大きさがwidthとheightに入っている
+	print(width)
+	print(height)
+	tmp_x1 = x1 + int(height / 2) + int(sortedDict[0][0] % 4.5) * height#Maxの画像の中心座標ｘ
+	tmp_y1 = y1 + int(width / 2) + int(int(sortedDict[0][0]) / 5) * width#Maxの画像の中心座標ｙ
+	point1 = np.array([tmp_x1, tmp_y1])#Maxの画像の中心座標
+	tmp_x2 = x1 + int(height / 2) + int(sortedDict[1][0] % 4.5) * height#Secondの画像の中心座標ｘ
+	tmp_y2 = y1 + int(width / 2) + int(int(sortedDict[1][0]) / 5) * width#Secondの画像の中心座標ｙ
+	point2 = np.array([tmp_x2, tmp_y2])#Secondの画像の中心座標
+	print(str(tmp_x1) + ", " + str(tmp_y1) + " " + str(tmp_x2) + ", " + str(tmp_y2))
+	
+	#傷の重心を計算(黒だったところの多さで内分点を決定する)
+	#p1 = int(sortedDict[0][1] / N)
+	#p2 = int(sortedDict[1][1] / N)
+	#tmp_x = int((point1[0] * p1 + point2[0] * p2) / (p1 + p2))
+	#tmp_y = int((point1[1] * p1 + point2[1] * p2) / (p1 + p2))
+	
+	#中点を重心にする
+	tmp_x = int((point1[0] + point2[0]) / 2)
+	tmp_y = int((point1[1] + point2[1]) / 2)
+	g_point = np.array([tmp_x, tmp_y])#傷の重心
+	#print(g_point)
+	
 	
 
 
 
 if __name__ == '__main__':
 		img = cv.imread(path)
-		find_rect(img)
-		#cv.imshow("incision1",img)
+		find_gravity(img)
+		cv.drawMarker(img, (point1[0], point1[1]), (255, 0, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
+		cv.drawMarker(img, (point2[0], point2[1]), (255, 0, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
+		cv.drawMarker(img, (g_point[0], g_point[1]), (0, 255, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
+		cv.imshow("incision1",img)
 		#cv.imshow("incision2",tmp_img)
 		#cv.imshow("incision2",tmp_img_re)
 		cv.waitKey()
