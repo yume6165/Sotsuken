@@ -180,6 +180,7 @@ def find_gravity(img):#グラフカットのための長方形を決定するた
 def detect_figure(img):
 	global tmp_img
 	tmp_img = cv.cvtColor(img, cv.COLOR_BGR2GRAY)#グレースケールに変換
+	tmp_img = cv.bilateralFilter(tmp_img, 15, 20, 20)
 	tmp_img = cv.GaussianBlur(tmp_img, (5, 5), 3)
 	tmp_img = cv.Canny(tmp_img, 50, 110)
 	
