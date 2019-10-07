@@ -177,16 +177,24 @@ def find_gravity(img):#グラフカットのための長方形を決定するた
 	#print(g_point)
 	
 	
+def detect_figure(img):
+	global tmp_img
+	tmp_img = cv.cvtColor(img, cv.COLOR_BGR2GRAY)#グレースケールに変換
+	tmp_img = cv.GaussianBlur(tmp_img, (5, 5), 3)
+	tmp_img = cv.Canny(tmp_img, 50, 110)
+	
 
 
 
 if __name__ == '__main__':
 		img = cv.imread(path)
 		find_gravity(img)
+		detect_figure(img)
+		
 		cv.drawMarker(img, (point1[0], point1[1]), (255, 0, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
 		cv.drawMarker(img, (point2[0], point2[1]), (255, 0, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
 		cv.drawMarker(img, (g_point[0], g_point[1]), (0, 255, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
 		cv.imshow("incision1",img)
-		#cv.imshow("incision2",tmp_img)
+		cv.imshow("incision2",tmp_img)
 		#cv.imshow("incision2",tmp_img_re)
 		cv.waitKey()
