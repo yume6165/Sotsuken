@@ -15,11 +15,11 @@ path = "./sample/incision_1.jpg"
 N = 1000
 
 def review(img, weight):#16区画の評価(2値化された画像を想定)+重みづけ
-	global point
 	point = 0
 	tmp_array = img.flatten()#一次元配列に変換
 
 	for pixel in tmp_array:
+		#print(pixel)
 		if( pixel == 0 ):
 			point += 1
 
@@ -102,7 +102,7 @@ def find_gravity(img):#グラフカットのための長方形を決定するた
 	width = img.shape[0]
 	height = img.shape[1]
 	threshold = 110
-	cut_rate = 80 #トリミングするときの比率
+	cut_rate = 70 #トリミングするときの比率
 	comp_rate = 25 #4*4で画像を区切って
 
 	print(str(width) + " " + str(height))
@@ -120,9 +120,9 @@ def find_gravity(img):#グラフカットのための長方形を決定するた
 
 	#傷が写真の中心にあると仮定して真ん中のみを切り取り
 	x1 = int(width * (100 - cut_rate) / 2 / 100)
-	x2 = int(width * (1 - (100 - cut_rate) / 2 / 100))
+	x2 = int(width - x1)
 	y1 = int(height * (100 - cut_rate) / 2 / 100)
-	y2 = int(height * (1 - (100 - cut_rate) / 2 / 100))
+	y2 = int(height - y1)
 	#print(str(x1)+ " " + str(x2) + ", " + str(y1) + " " + str(y2))
 
 	tmp_img_re = tmp_img[x1 : x2, y1: y2]
@@ -134,20 +134,20 @@ def find_gravity(img):#グラフカットのための長方形を決定するた
 	point_dict = {} #point_dictを初期化
 	for d in list_sepa:
 		if (count == 6 or count == 7 or count == 10 or count ==11):
-			point = review(d, 4)
+			point = review(d, 1)
 			point_dict[count] = point
 			print(str(count)+ " : " + str(point))
 			count += 1
 
 		else:
-			point = review(d, 1)
+			point = review(d, 0.2)
 			point_dict[count] = point
 			print(str(count)+ " : " + str(point))
 			count += 1
 
 	#pointと画素の番号を辞書型で保存
 	sortedDict = sorted(point_dict.items(), key=lambda x:x[1], reverse=True)#list型
-	print(point_dict)
+	#print(point_dict)
 
 	#cv.imshow("Most", list_sepa[sortedDict[0][0] - 1])
 	#cv.imshow("Second", list_sepa[sortedDict[1][0] - 1])
@@ -157,6 +157,7 @@ def find_gravity(img):#グラフカットのための長方形を決定するた
 	#ここの時点で一区画の大きさがwidthとheightに入っている
 	print(width)
 	print(height)
+	print(str(sortedDict[0][0]) + ", " + str(sortedDict[1][0]))
 	tmp_x1 = x1 + int(height / 2) + int(sortedDict[0][0] % 4.5) * height#Maxの画像の中心座標ｘ
 	tmp_y1 = y1 + int(width / 2) + int(int(sortedDict[0][0]) / 5) * width#Maxの画像の中心座標ｙ
 	point1 = np.array([tmp_x1, tmp_y1])#Maxの画像の中心座標
