@@ -177,12 +177,29 @@ def find_gravity(img):#グラフカットのための長方形を決定するた
 	#print(g_point)
 	
 	
-def detect_figure(img):
-	global tmp_img
+def detect_figure(img):#重心を使って最短辺から最長辺を求める
+	global tmp_img, g_point
 	tmp_img = cv.cvtColor(img, cv.COLOR_BGR2GRAY)#グレースケールに変換
-	tmp_img = cv.bilateralFilter(tmp_img, 15, 20, 20)
-	tmp_img = cv.GaussianBlur(tmp_img, (5, 5), 3)
-	tmp_img = cv.Canny(tmp_img, 50, 110)
+	tmp_img = cv.bilateralFilter(tmp_img, 15, 20, 20)#バイラテラルフィルタをかける
+	tmp_img = cv.GaussianBlur(tmp_img, (5, 5), 3)#ガウシアンフィルタ
+	tmp_img = cv.Canny(tmp_img, 50, 110)#エッジ検出
+	
+	#Harrisのコーナー検出
+	gray = np.float32(tmp_img)
+	dst = cv.cornerHarris(gray, 2, 3, 0.01)
+	dst = cv.dilate(dst, None)
+	print(dst)
+	img[dst>0.01*dst.max()]=[255, 0,0]
+	
+	
+	#最短辺を求める
+	#重心から最も近いエッジを検出
+	for i in range(len(dst)):#多分縦方向
+		for j range(len(dst[0])):#多分横方向	
+			if(dst[j][i] == 255):#白だったら
+				tmp_point = np.array([j, i])#ベクトルを保存
+				print(np.linalg.norm(g_point - tmp_point))
+	
 	
 
 
@@ -192,8 +209,8 @@ if __name__ == '__main__':
 		find_gravity(img)
 		detect_figure(img)
 		
-		cv.drawMarker(img, (point1[0], point1[1]), (255, 0, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
-		cv.drawMarker(img, (point2[0], point2[1]), (255, 0, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
+		#cv.drawMarker(img, (point1[0], point1[1]), (255, 0, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
+		#cv.drawMarker(img, (point2[0], point2[1]), (255, 0, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
 		cv.drawMarker(img, (g_point[0], g_point[1]), (0, 255, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
 		cv.imshow("incision1",img)
 		cv.imshow("incision2",tmp_img)
