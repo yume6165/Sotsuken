@@ -14,6 +14,19 @@ path = "./sample/incision_1.jpg"
 
 N = 1000
 
+def equal_list(lst1, lst2):
+    lst = list(lst1)
+    for element in lst2:
+        try:
+            lst.remove(element)
+        except ValueError:
+            break
+    else:
+        if not lst:
+            return True
+    return False
+
+
 def review(img, weight):#16区画の評価(2値化された画像を想定)+重みづけ
 	point = 0
 	tmp_array = img.flatten()#一次元配列に変換
@@ -180,17 +193,21 @@ def find_gravity(img):#グラフカットのための長方形を決定するた
 
 
 def detect_figure(img):#重心を使って最短辺から最長辺を求める
-	global tmp_img, g_point
+	global tmp_img, g_point, min_point, tmp_point
 	tmp_img = cv.cvtColor(img, cv.COLOR_BGR2GRAY)#グレースケールに変換
 	tmp_img = cv.bilateralFilter(tmp_img, 15, 20, 20)#バイラテラルフィルタをかける
 	tmp_img = cv.GaussianBlur(tmp_img, (5, 5), 3)#ガウシアンフィルタ
 	tmp_img = cv.Canny(tmp_img, 50, 110)#エッジ検出
+	min = N
+	tmp_point = []
+	min_point = []
+	dir = 0
 
 	#Harrisのコーナー検出
 	gray = np.float32(tmp_img)
 	dst = cv.cornerHarris(gray, 2, 3, 0.01)
 	dst = cv.dilate(dst, None)
-	print(dst)
+	#print(dst)
 	img[dst>0.01*dst.max()]=[255, 0,0]
 
 
@@ -198,22 +215,27 @@ def detect_figure(img):#重心を使って最短辺から最長辺を求める
 	#重心から最も近いエッジを検出
 	for i in range(len(dst)):#多分縦方向
 		for j in range(len(dst[0])):#多分横方向
-			if(dst[j][i] == 255):#白だったら
-				tmp_point = np.array([j, i])#ベクトルを保存
-				print(np.linalg.norm(g_point - tmp_point))
+			#print(tmp_img[dst>0.01*dst.max()])
+			if(equal_list(tmp_img[i][j].tolist(), [255, 255 , 255])):#コーナを青に塗り直した元画像の画素が青だったら
+				tmp_point = np.array([i, j])#ベクトルを保存
 
-
+				dir = np.linalg.norm(g_point - tmp_point)
+				if(dir < min):
+					min = dir
+					min_point = tmp_point
+	print(min_point)
 
 
 
 if __name__ == '__main__':
 		img = cv.imread(path)
 		find_gravity(img)
-		#detect_figure(img)
+		detect_figure(img)
 
 		#cv.drawMarker(img, (point1[0], point1[1]), (255, 0, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
 		#cv.drawMarker(img, (point2[0], point2[1]), (255, 0, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
 		cv.drawMarker(img, (g_point[0], g_point[1]), (0, 255, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
+		cv.drawMarker(img, (min_point[0], min_point[1]), (0, 255, 255), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
 		cv.imshow("incision1",img)
 		cv.imshow("incision2",tmp_img)
 		#cv.imshow("incision2",tmp_img_re)
