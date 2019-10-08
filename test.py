@@ -195,7 +195,7 @@ def detect_figure(img):#重心を使って最短辺から最長辺を求める
 	#最短辺を求める
 	#重心から最も近いエッジを検出
 	for i in range(len(dst)):#多分縦方向
-		for j range(len(dst[0])):#多分横方向	
+		for j in range(len(dst[0])):#多分横方向	
 			if(dst[j][i] == 255):#白だったら
 				tmp_point = np.array([j, i])#ベクトルを保存
 				print(np.linalg.norm(g_point - tmp_point))
@@ -207,7 +207,7 @@ def detect_figure(img):#重心を使って最短辺から最長辺を求める
 if __name__ == '__main__':
 		img = cv.imread(path)
 		find_gravity(img)
-		detect_figure(img)
+		#detect_figure(img)
 		
 		#cv.drawMarker(img, (point1[0], point1[1]), (255, 0, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
 		#cv.drawMarker(img, (point2[0], point2[1]), (255, 0, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
