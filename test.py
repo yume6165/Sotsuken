@@ -7,15 +7,15 @@ from PIL import Image
 import numpy as np
 
 #研究室で研究するとき
-path = "./sample/incision_1.jpg"
+#path = "./sample/incision_1.jpg"
 
 #ノートパソコンで研究するとき
-#path = "D:\Sotsuken\Sotsuken_repo./sample/incision_1.jpg"
+path = "D:\Sotsuken\Sotsuken_repo./sample/incision_1.jpg"
 
 N = 1000
 
 def equal_list(lst1, lst2):
-    lst = list(lst1)
+    lst = list(str(lst1))
     for element in lst2:
         try:
             lst.remove(element)
@@ -106,7 +106,7 @@ def separate(img):#16区画に分ける
 	#
 
 
-def find_gravity(img):#グラフカットのための長方形を決定するための関数
+def find_gravity(img):#傷の重心を探す関数
 	global tmp_img, width, height, x1, x2, y1, y2, N#画像処理のための一時的な保管場所
 	global tmp_img_re, list_sepa
 	global point_dict, point1, point2, g_point, tmp_x, tmp_y
@@ -216,7 +216,8 @@ def detect_figure(img):#重心を使って最短辺から最長辺を求める
 	for i in range(len(dst)):#多分縦方向
 		for j in range(len(dst[0])):#多分横方向
 			#print(tmp_img[dst>0.01*dst.max()])
-			if(equal_list(tmp_img[i][j].tolist(), [255, 255 , 255])):#コーナを青に塗り直した元画像の画素が青だったら
+			print(tmp_img[i][j].tolist())
+			if(tmp_img[i][j].tolist() == 255):#エッジ（白）ならば
 				tmp_point = np.array([i, j])#ベクトルを保存
 
 				dir = np.linalg.norm(g_point - tmp_point)
