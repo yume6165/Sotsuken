@@ -193,7 +193,8 @@ def find_gravity(img):#傷の重心を探す関数
 
 
 def detect_figure(img):#重心を使って最短辺から最長辺を求める
-	global tmp_img, g_point, min_point, tmp_point
+	global tmp_img, g_point, min_point1,min_point2, tmp_point
+	global short_axi#最短辺
 	tmp_img = cv.cvtColor(img, cv.COLOR_BGR2GRAY)#グレースケールに変換
 	tmp_img = cv.bilateralFilter(tmp_img, 15, 20, 20)#バイラテラルフィルタをかける
 	tmp_img = cv.GaussianBlur(tmp_img, (5, 5), 3)#ガウシアンフィルタ
@@ -203,7 +204,7 @@ def detect_figure(img):#重心を使って最短辺から最長辺を求める
 	min_point = []
 	dir = 0
 
-	#Harrisのコーナー検出
+	#Harrisのコーナー検出(使ってない)
 	gray = np.float32(tmp_img)
 	dst = cv.cornerHarris(gray, 2, 3, 0.01)
 	dst = cv.dilate(dst, None)
@@ -216,16 +217,45 @@ def detect_figure(img):#重心を使って最短辺から最長辺を求める
 	for i in range(len(dst)):#多分縦方向
 		for j in range(len(dst[0])):#多分横方向
 			#print(tmp_img[dst>0.01*dst.max()])
-			print(tmp_img[i][j].tolist())
+			#print(tmp_img[i][j].tolist())
 			if(tmp_img[i][j].tolist() == 255):#エッジ（白）ならば
 				tmp_point = np.array([i, j])#ベクトルを保存
 
 				dir = np.linalg.norm(g_point - tmp_point)
 				if(dir < min):
 					min = dir
-					min_point = tmp_point
-	print(min_point)
-
+					min_point1 = tmp_point
+	
+	#最短点から傷の幅を計算y=kx + b
+	k = (g_point[1] - min_point1[1]) / (g_point[0] - min_point1[0])
+	b = g_point[1] - k * g_point[0]
+	print("k is "+str(k)+" , b is"+str(b))
+	
+	if(min_point1[0] <= g_point[0]):#最短点からみて重心の反対側を探す
+		for i in range(tmp_img.shape[0]):
+			x = g_point[0] + i
+			y = int(k * x + b)
+			
+			if(tmp_img[x][y].tolist() == 255 or tmp_img[x][y + 1].tolist() == 255 or tmp_img[x][y - 1].tolist() == 255):#エッジ（白）ならば,幅は３
+				tmp_point1 = np.array([x, y])#ベクトルを保存
+				min_point2 = tmp_point
+				break
+	else:
+		for i in range(tmp_img.shape[0]):
+			x = g_point[0] - i
+			y = int(k * x + b)
+			
+			if(tmp_img[x][y].tolist() == 255 or tmp_img[x][y + 1].tolist() == 255 or tmp_img[x][y - 1].tolist() == 255):#エッジ（白）ならば,幅は３
+				tmp_point = np.array([x, y])#ベクトルを保存
+				min_point2 = tmp_point
+				break
+	
+	#min_point1と２に最短辺の座標が入ってる
+	#最短辺の長さを算出
+	short_axi = round(np.linalg.norm(min_point1 - min_point2))
+	print(short_axi)
+	
+	#print(str(min_point1)+" , "+str(min_point2)+" , "+str(g_point))
 
 
 if __name__ == '__main__':
@@ -236,7 +266,8 @@ if __name__ == '__main__':
 		#cv.drawMarker(img, (point1[0], point1[1]), (255, 0, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
 		#cv.drawMarker(img, (point2[0], point2[1]), (255, 0, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
 		cv.drawMarker(img, (g_point[0], g_point[1]), (0, 255, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
-		cv.drawMarker(img, (min_point[0], min_point[1]), (0, 255, 255), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
+		cv.drawMarker(img, (min_point1[0], min_point1[1]), (0, 255, 255), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
+		cv.drawMarker(img, (min_point2[0], min_point2[1]), (0, 255, 255), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
 		cv.imshow("incision1",img)
 		cv.imshow("incision2",tmp_img)
 		#cv.imshow("incision2",tmp_img_re)
