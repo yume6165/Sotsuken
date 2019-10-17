@@ -108,7 +108,7 @@ def separate(img):#16区画に分ける
 
 def find_gravity(img):#傷の重心を探す関数
 	global tmp_img, width, height, x1, x2, y1, y2, N#画像処理のための一時的な保管場所
-	global tmp_img_re, list_sepa
+	global tmp_img_re, list_sepa, binary_image#２値画像
 	global point_dict, point1, point2, g_point, tmp_x, tmp_y
 
 	#パラメータ
@@ -137,7 +137,8 @@ def find_gravity(img):#傷の重心を探す関数
 	y1 = int(height * (100 - cut_rate) / 2 / 100)
 	y2 = int(height - y1)
 	#print(str(x1)+ " " + str(x2) + ", " + str(y1) + " " + str(y2))
-
+	
+	binary_image = tmp_img
 	tmp_img_re = tmp_img[x1 : x2, y1: y2]
 
 	#トリミングした画素を16区画に分ける=sepa1~sepa16に画像のデータが入る
@@ -193,8 +194,10 @@ def find_gravity(img):#傷の重心を探す関数
 
 
 def detect_figure(img):#重心を使って最短辺から最長辺を求める
-	global tmp_img, g_point, min_point1,min_point2, tmp_point
+	global tmp_img, g_point, min_point1,min_point2, max_point1, max_point2, tmp_point
 	global short_axi#最短辺
+	global x , y, k, b#係数と変数
+	global binary_image#2値画像
 	tmp_img = cv.cvtColor(img, cv.COLOR_BGR2GRAY)#グレースケールに変換
 	tmp_img = cv.bilateralFilter(tmp_img, 15, 20, 20)#バイラテラルフィルタをかける
 	tmp_img = cv.GaussianBlur(tmp_img, (5, 5), 3)#ガウシアンフィルタ
@@ -209,7 +212,7 @@ def detect_figure(img):#重心を使って最短辺から最長辺を求める
 	dst = cv.cornerHarris(gray, 2, 3, 0.01)
 	dst = cv.dilate(dst, None)
 	#print(dst)
-	img[dst>0.01*dst.max()]=[255, 0,0]
+	#img[dst>0.01*dst.max()]=[255, 0,0]
 
 
 	#最短辺を求める
@@ -229,7 +232,7 @@ def detect_figure(img):#重心を使って最短辺から最長辺を求める
 	#最短点から傷の幅を計算y=kx + b
 	k = (g_point[1] - min_point1[1]) / (g_point[0] - min_point1[0])
 	b = g_point[1] - k * g_point[0]
-	print("k is "+str(k)+" , b is"+str(b))
+	#print("k is "+str(k)+" , b is"+str(b))
 	
 	if(min_point1[0] <= g_point[0]):#最短点からみて重心の反対側を探す
 		for i in range(tmp_img.shape[0]):
@@ -237,7 +240,7 @@ def detect_figure(img):#重心を使って最短辺から最長辺を求める
 			y = int(k * x + b)
 			
 			if(tmp_img[x][y].tolist() == 255 or tmp_img[x][y + 1].tolist() == 255 or tmp_img[x][y - 1].tolist() == 255):#エッジ（白）ならば,幅は３
-				tmp_point1 = np.array([x, y])#ベクトルを保存
+				tmp_point = np.array([x, y])#ベクトルを保存
 				min_point2 = tmp_point
 				break
 	else:
@@ -253,7 +256,40 @@ def detect_figure(img):#重心を使って最短辺から最長辺を求める
 	#min_point1と２に最短辺の座標が入ってる
 	#最短辺の長さを算出
 	short_axi = round(np.linalg.norm(min_point1 - min_point2))
-	print(short_axi)
+	#print(short_axi)
+	
+	
+	#最長辺を計算
+	#最短辺と垂直で重心を通る直線を計算y-kx+b
+	k = -1 / k
+	b = g_point[1] - k * g_point[0]
+	print("k is "+str(k)+" , b is"+str(b))
+	
+	#最短辺同様に最長辺を求める
+	inner = 0
+	outer = 0
+	for i in range(tmp_img.shape[0] - g_point[0] - 1):
+			x = g_point[0] + i
+			y = int(k * x + b)
+			inner += binary_image[x][y]
+			outer = round(binary_image[x + 1][int(k * (x + 1) + b)] + binary_image[x + 2][int(k * (x + 2) + b)] + binary_image[x + 3][int(k * (x + 3) + b)], 2)
+			#outer += img[x + ][int(k * (x + 1) + b) + 1] + img[x + 2][int(k * (x + 2) + b) + 1] + img[x + 3][int(k * (x + 3) + b) + 1]
+			#outer += img[x + 1][int(k * (x + 1) + b) - 1] + img[x + 2][int(k * (x + 2) + b) - 1] + img[x + 3][int(k * (x + 3) + b) - 1]
+			
+			inner = np.array(inner)
+			outer = np.array(outer/3)
+			#result = ((inner[0] - outer[0])**2 + (inner[1] - outer[1])**2 + (inner[2] - outer[2])**2) ** (1 / 3)
+			result = inner - outer
+			#print(str(inner)+ " , "+ str(outer))
+			print(str(x) + " : "+str(result))
+			
+			if(tmp_img[x][y].tolist() == 255 or tmp_img[x][y + 1].tolist() == 255 or tmp_img[x][y - 1].tolist() == 255
+				):#エッジ（白）ならば,幅は３
+				tmp_point = np.array([x, y])#ベクトルを保存
+				max_point1 = tmp_point
+				#break
+	
+	
 	
 	#print(str(min_point1)+" , "+str(min_point2)+" , "+str(g_point))
 
@@ -268,7 +304,9 @@ if __name__ == '__main__':
 		cv.drawMarker(img, (g_point[0], g_point[1]), (0, 255, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
 		cv.drawMarker(img, (min_point1[0], min_point1[1]), (0, 255, 255), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
 		cv.drawMarker(img, (min_point2[0], min_point2[1]), (0, 255, 255), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
+		cv.drawMarker(img, (142, int(k * 142 + b)), (255, 255, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
+		#cv.drawMarker(img, (max_point2[0], max_point2[1]), (255, 255, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
 		cv.imshow("incision1",img)
 		cv.imshow("incision2",tmp_img)
-		#cv.imshow("incision2",tmp_img_re)
+		cv.imshow("incision3",binary_image)
 		cv.waitKey()
