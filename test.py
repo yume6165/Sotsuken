@@ -199,6 +199,8 @@ def detect_figure(img):#重心を使って最短辺から最長辺を求める
 	global x , y, k, b#係数と変数
 	global binary_image#2値画像
 	tmp_img = cv.cvtColor(img, cv.COLOR_BGR2GRAY)#グレースケールに変換
+	tmp_img = cv.GaussianBlur(tmp_img, (5, 5), 3)#ガウシアンフィルタ
+	tmp_img = cv.GaussianBlur(tmp_img, (5, 5), 3)#ガウシアンフィルタ
 	tmp_img = cv.bilateralFilter(tmp_img, 15, 20, 20)#バイラテラルフィルタをかける
 	tmp_img = cv.GaussianBlur(tmp_img, (5, 5), 3)#ガウシアンフィルタ
 	tmp_img = cv.Canny(tmp_img, 50, 110)#エッジ検出
@@ -287,7 +289,7 @@ def detect_figure(img):#重心を使って最短辺から最長辺を求める
 				):#エッジ（白）ならば,幅は３
 				tmp_point = np.array([x, y])#ベクトルを保存
 				max_point1 = tmp_point
-				#break
+				break
 	
 	
 	
