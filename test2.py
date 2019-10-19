@@ -260,6 +260,7 @@ def detect_figure(img):#重心を使って最短辺から最長辺を求める
 			min_point1 = tmp_point1
 			min_point2 = tmp_point2
 			short_axi = round(np.linalg.norm(tmp_point1 - tmp_point2))
+			print(str(tmp_point1) +" , "+ str(tmp_point2))
 			print("short : "+ str(short_axi))
 			
 		if(long_axi < round(np.linalg.norm(tmp_point1 - tmp_point2))):

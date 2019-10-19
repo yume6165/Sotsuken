@@ -5,6 +5,7 @@ import os, sys, time
 import cv2 as cv
 from PIL import Image
 import numpy as np
+import math
 
 #研究室で研究するとき
 #path = "./sample/incision_1.jpg"
@@ -263,30 +264,51 @@ def detect_figure(img):#重心を使って最短辺から最長辺を求める
 	
 	
 	#最長辺を計算
-	#最短辺と垂直で重心を通る直線を計算y-kx+b
-	k = -1 / k
-	b = g_point[1] - k * g_point[0]
-	print("k is "+str(k)+" , b is"+str(b))
+	long_axi = 0
+	tmp_point1 = []
+	tmp_point2 = []
 	
-	#最短辺同様に最長辺を求める
-	#最短点からみて重心の反対側を探す
-	for i in range(tmp_img.shape[0]):
-			x = g_point[0] + i
-			y = int(k * x + b)
+	for r in range(179):#tanの発散を防ぐために数値設定
+		k = round(math.tan(math.radians(r - 89)),3)
+		b = round(g_point[1] - k * g_point[0], 3)
+		for i in range(tmp_img.shape[0]- g_point[0]):
+				x = g_point[0] + i
+				y = int(round(k * x + b))
+				if(y < 0 or tmp_img.shape[1] - 2 < y):#幅３なのでその分ｙの範囲が狭まる
+					continue
 			
-			if(tmp_img[x][y].tolist() == 255 or tmp_img[x][y + 1].tolist() == 255 or tmp_img[x][y - 1].tolist() == 255):#エッジ（白）ならば,幅は３
-				tmp_point = np.array([x, y])#ベクトルを保存
-				max_point1 = tmp_point
-				break
+				elif(tmp_img[x][y].tolist() == 255 or tmp_img[x][y + 1].tolist() == 255 or tmp_img[x][y - 1].tolist() == 255):#エッジ（白）ならば,幅は３
+					tmp_point1 = np.array([y, x])
+					break
 				
-	for i in range(tmp_img.shape[0]):
-			x = g_point[0] - i
-			y = int(k * x + b)
+		for i in range(g_point[0]):
+				x = g_point[0] - i
+				y = int(round(k * x + b))
+				
+				if(y < 0 or tmp_img.shape[1] - 2 <= y):
+					continue
+					
+				elif(tmp_img[x][y].tolist() == 255 or tmp_img[x][y + 1].tolist() == 255 or tmp_img[x][y - 1].tolist() == 255):#エッジ（白）ならば,幅は３
+					tmp_point2 = np.array([y, x])#ベクトルを保存
+					break
+		
+		if(tmp_point1 == [] or tmp_point2 == []):
+			continue
+		
+		#min_point1と２に最短辺の座標が入ってる
+		#最短辺の長さを算出
+		#print(str(tmp_point1) +" , "+ str(tmp_point2))
+		tmp_point1 = np.array(tmp_point1)
+		tmp_point2 = np.array(tmp_point2)
 			
-			if(tmp_img[x][y].tolist() == 255 or tmp_img[x][y + 1].tolist() == 255 or tmp_img[x][y - 1].tolist() == 255):#エッジ（白）ならば,幅は３
-				tmp_point = np.array([x, y])#ベクトルを保存
-				max_point2 = tmp_point
-				break
+		if(long_axi < round(np.linalg.norm(tmp_point1 - tmp_point2))):
+			max_point1 = tmp_point1
+			max_point2 = tmp_point2
+			long_axi = round(np.linalg.norm(tmp_point1 - tmp_point2))
+			print("long : "+ str(long_axi))
+		
+		tmp_point1 = []
+		tmp_point2 = []
 	
 	
 	
