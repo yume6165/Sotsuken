@@ -6,6 +6,7 @@ import cv2 as cv
 from PIL import Image
 import numpy as np
 import math
+import matplotlib.pyplot as plt
 
 #研究室で研究するとき
 #path = "./sample/incision_1.jpg"
@@ -322,12 +323,16 @@ def detect_sharp(img):#どれだけ鋭い傷かを判定する
 	
 	k = (max_point1[1] - max_point2[1])/(max_point1[0] - max_point2[0])
 	b = max_point1[1] - k * max_point1[0]
+	size = []
+	distance = []
+	sin_x = []
+	sin_y = []
 
 	
 	if(max_point1[0] > max_point2[0]):
 		
-		for i in range(int(long_axi/5)):
-			x = max_point1[0] - i*5
+		for i in range(int(long_axi)):
+			x = max_point1[0] - i
 			y = int(round(k * x + b))
 			c = y + 1 / k * x
 			tmp_point1 = []
@@ -365,8 +370,8 @@ def detect_sharp(img):#どれだけ鋭い傷かを判定する
 				print(round(np.linalg.norm(tmp_point1 - tmp_point2)))
 			
 	elif(max_point1[0] <= max_point2[0]):
-		for i in range(int(round(long_axi/5))):		
-			x = max_point1[0] + (i)*5
+		for i in range(int(round(long_axi))):		
+			x = max_point1[0] + i
 			y = int(round(k * x + b))
 			c = y + 1 / k * x
 			tmp_point1 = []
@@ -385,7 +390,7 @@ def detect_sharp(img):#どれだけ鋭い傷かを判定する
 				elif(x1 < 0 or tmp_img.shape[0] <= x1):
 					continue
 				
-				elif(tmp_img[x1][y1].tolist() == 255 or tmp_img[x1][y1 + 1].tolist() == 255 or tmp_img[x1][y1 - 1].tolist() == 255):#エッジ（白）ならば,幅は３
+				elif(tmp_img[y1][x1].tolist() == 255 or tmp_img[y1][x1 + 1].tolist() == 255 or tmp_img[y1][x1 - 1].tolist() == 255):#エッジ（白）ならば,幅は３
 					tmp_point1 = np.array([y1, x1])#ベクトルを保存
 					break
 				
@@ -399,25 +404,34 @@ def detect_sharp(img):#どれだけ鋭い傷かを判定する
 				elif(x1 < 0 or tmp_img.shape[0] <= x1):
 					continue
 				
-				elif(tmp_img[x1][y1].tolist() == 255 or tmp_img[x1][y1 + 1].tolist() == 255 or tmp_img[x1][y1 - 1].tolist() == 255):#エッジ（白）ならば,幅は３
+				elif(tmp_img[y1][x1].tolist() == 255 or tmp_img[y1][x1 + 1].tolist() == 255 or tmp_img[y1][x1 - 1].tolist() == 255):#エッジ（白）ならば,幅は３
 					tmp_point2 = np.array([y1, x1])#ベクトルを保存
 					break
 				
 				
-			print(str(tmp_point1) + " , "+ str(tmp_point2))
+			#print(str(tmp_point1) + " , "+ str(tmp_point2))
 			
 			if(tmp_point1 == [] or tmp_point2 == []):
-				print("Skip")
+				#print("Skip")
 				continue
 			
 			else:
 				#cv.drawMarker(img, (x, y), (255, 255, 255), markerType=cv.MARKER_TILTED_CROSS, markerSize=5)
 				cv.drawMarker(img, (tmp_point1[0], tmp_point1[1]), (i*15, 255, 25), markerType=cv.MARKER_TILTED_CROSS, markerSize=5)
 				cv.drawMarker(img, (tmp_point2[0], tmp_point2[1]), (i*15, 255, 25), markerType=cv.MARKER_TILTED_CROSS, markerSize=5)
-				print(round(np.linalg.norm(tmp_point1 - tmp_point2)))
-			
-			
-	cv.imshow("img",img)
+				size.append(round(np.linalg.norm(tmp_point1 - tmp_point2), 3))
+				distance.append(i)
+				
+	#print(size)
+	sin_x = np.arange(0,distance.index(max(distance))+2, 1)
+	#print(sin_x)
+	sin_y = np.sin(sin_x/(distance.index(max(distance))+1)*math.pi)*short_axi
+	#print(sin_y)
+	plt.scatter(distance, size, label="sharp", color="red")	
+	plt.plot(sin_x, sin_y, label="sin", color="green")
+	plt.plot(distance, np.poly1d(np.polyfit(distance, size, 4))(distance), label="近似", color="red")
+	#cv.imshow("img",img)
+	plt.show()
 	#cv.imshow("tmp_img",tmp_img)
 	
 	return 0
