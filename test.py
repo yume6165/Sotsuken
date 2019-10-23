@@ -316,7 +316,7 @@ def detect_figure(img):#重心を使って最短辺から最長辺を求める
 	
 	return max_point1, max_point2, min_point1, min_point2, long_axi, short_axi
 	
-def detect_sharp(img):#どれだけ鋭い傷かを判定する
+def detect_edge(img):#どれだけ鋭い傷かを判定する
 	global tmp_point1, tmp_point2, x, y
 	tmp_img = edge_detection(img)
 	max_point1, max_point2, min_point1, min_point2, long_axi, short_axi = detect_figure(img)
@@ -423,26 +423,52 @@ def detect_sharp(img):#どれだけ鋭い傷かを判定する
 				distance.append(i)
 				
 	#print(size)
-	sin_x = np.arange(0,distance.index(max(distance))+2, 1)
-	#print(sin_x)
-	sin_y = np.sin(sin_x/(distance.index(max(distance))+1)*math.pi)*short_axi
-	#print(sin_y)
+	#cv.imshow("tmp_img",tmp_img)
+	
+	return size, distance, short_axi
+	
+
+def oval_judge(img):
+	size, distance, short_axi = detect_edge(img)
+	
+	#傷が円に近いほどsinとの誤差が小さくなる
+	sin_x = np.arange(0,distance.index(max(distance))+1, 1)
+	sin_y = np.sin(sin_x/(distance.index(max(distance)))*math.pi)*short_axi
+	
+	#差分は正規化
+	difference = abs((size - sin_y)*(size - sin_y))/short_axi/short_axi
+	#plt.plot(sin_x, difference, label="difference")
+	difference = sum(difference)/len(difference)#平均
+	print(difference)
+	
+	if (difference <= 0.02):
+		return True
+	else:
+		return False
+		
+
+def sharp_judge(img):
+	size, distance, short_axi = detect_edge(img)
+	
+	
+	
+	
+	
+	#サイン関数とプロット、近似曲線を表示
 	plt.scatter(distance, size, label="sharp", color="red")	
 	plt.plot(sin_x, sin_y, label="sin", color="green")
 	plt.plot(distance, np.poly1d(np.polyfit(distance, size, 4))(distance), label="近似", color="red")
 	#cv.imshow("img",img)
 	plt.show()
-	#cv.imshow("tmp_img",tmp_img)
 	
-	return 0
-
+	
 
 if __name__ == '__main__':
 		img = cv.imread(path)
 		find_gravity(img)
 		detect_figure(img)
 		
-		detect_sharp(img)
+		print(oval_judge(img))
 
 		#cv.drawMarker(img, (point1[0], point1[1]), (255, 0, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
 		#cv.drawMarker(img, (point2[0], point2[1]), (255, 0, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
