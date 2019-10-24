@@ -449,17 +449,48 @@ def oval_judge(img):
 
 def sharp_judge(img):
 	size, distance, short_axi = detect_edge(img)
+	cos_x = np.arange(0,distance.index(max(distance))+1, 1)
+	cos_y = np.cos(cos_x/(distance.index(max(distance)))*math.pi)*short_axi
 	
+	#傷の幅を3分割にする
+	sp_size = list(np.array_split(size, 3))
+	sp_distance = list(np.array_split(distance, 3))
+	sp_cos_x = list(np.array_split(cos_x, 3))
+	sp_cos_y = list(np.array_split(cos_y, 3))
 	
+	#差分を計算(fw:前)
+	fw_size = np.diff(sp_size[0], n=1)
+	fw_distance = [x for x in range(len(fw_size))]
+	fw_cos_x = [x for x in range(len(fw_size))]
+	fw_cos_y = np.cos(np.array(fw_cos_x)/(distance.index(max(distance)))*math.pi)*short_axi
 	
+	#円の増加速度と比較
+	fw_result = fw_size / fw_cos_y
+	fw_result = round(max(fw_result), 3)
+	
+	#差分を計算(bw:後)
+	bw_size = np.diff(sp_size[2], n=1)
+	bw_distance = [x for x in range(len(sp_distance[0])+len(sp_distance[1]), len(distance)-1)]
+	bw_cos_x = [x for x in range(len(sp_distance[0])+len(sp_distance[1]), len(distance)-1)]
+	bw_cos_y = np.cos(np.array(bw_cos_x)/(distance.index(max(distance)))*math.pi)*short_axi
+	
+	#円の増加速度と比較
+	bw_result = bw_size / bw_cos_y
+	bw_result = round(max(bw_result), 3)
 	
 	
 	#サイン関数とプロット、近似曲線を表示
-	plt.scatter(distance, size, label="sharp", color="red")	
-	plt.plot(sin_x, sin_y, label="sin", color="green")
-	plt.plot(distance, np.poly1d(np.polyfit(distance, size, 4))(distance), label="近似", color="red")
+	#plt.scatter(sp_distance[2], sp_size[2], label="sharp", color="red")	
+	#plt.plot(bw_cos_x, bw_cos_y, label="sin", color="green")
+	#plt.plot(bw_distance, np.poly1d(np.polyfit(bw_distance, bw_size, 2))(bw_distance), label="近似", color="red")
 	#cv.imshow("img",img)
-	plt.show()
+	#plt.show()
+	
+	if((fw_result + bw_result) / 2 < 0.5):#0.5未満ならシャープ
+		return True
+		
+	else:
+		return False
 	
 	
 
@@ -468,7 +499,8 @@ if __name__ == '__main__':
 		find_gravity(img)
 		detect_figure(img)
 		
-		print(oval_judge(img))
+		#print(oval_judge(img))
+		print(sharp_judge(img))
 
 		#cv.drawMarker(img, (point1[0], point1[1]), (255, 0, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
 		#cv.drawMarker(img, (point2[0], point2[1]), (255, 0, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
