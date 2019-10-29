@@ -129,7 +129,7 @@ def find_gravity(img):#傷の重心を探す関数
 	cut_rate = 70 #トリミングするときの比率
 	comp_rate = 25 #4*4で画像を区切って
 
-	print(str(width) + " " + str(height))
+	#print(str(width) + " " + str(height))
 
 
 	tmp_img = cv.cvtColor(img, cv.COLOR_BGR2GRAY)#グレースケールに変換
@@ -189,7 +189,7 @@ def find_gravity(img):#傷の重心を探す関数
 	tmp_x2 = x1 + int(height / 2) + int(sortedDict[1][0] % 4.5) * height#Secondの画像の中心座標ｘ
 	tmp_y2 = y1 + int(width / 2) + int(int(sortedDict[1][0]) / 5) * width#Secondの画像の中心座標ｙ
 	point2 = np.array([tmp_x2, tmp_y2])#Secondの画像の中心座標
-	print(str(tmp_x1) + ", " + str(tmp_y1) + " " + str(tmp_x2) + ", " + str(tmp_y2))
+	#print(str(tmp_x1) + ", " + str(tmp_y1) + " " + str(tmp_x2) + ", " + str(tmp_y2))
 
 	#傷の重心を計算(黒だったところの多さで内分点を決定する)
 	#p1 = int(sortedDict[0][1] / N)
@@ -202,6 +202,7 @@ def find_gravity(img):#傷の重心を探す関数
 	tmp_y = int((point1[1] + point2[1]) / 2)
 	g_point = np.array([tmp_x, tmp_y])#傷の重心
 	#print(g_point)
+	return g_point
 
 
 def detect_figure(img):#重心を使って最短辺から最長辺を求める
@@ -248,7 +249,9 @@ def detect_figure(img):#重心を使って最短辺から最長辺を求める
 			x = g_point[0] + i
 			y = int(k * x + b)
 			
-			if(tmp_img[x][y].tolist() == 255 or tmp_img[x][y + 1].tolist() == 255 or tmp_img[x][y - 1].tolist() == 255):#エッジ（白）ならば,幅は３
+			if(x >= tmp_img.shape[0]):
+				continue
+			elif(tmp_img[x][y].tolist() == 255 or tmp_img[x][y + 1].tolist() == 255 or tmp_img[x][y - 1].tolist() == 255):#エッジ（白）ならば,幅は３
 				tmp_point = np.array([x, y])#ベクトルを保存
 				min_point2 = tmp_point
 				break
@@ -257,7 +260,9 @@ def detect_figure(img):#重心を使って最短辺から最長辺を求める
 			x = g_point[0] - i
 			y = int(k * x + b)
 			
-			if(tmp_img[x][y].tolist() == 255 or tmp_img[x][y + 1].tolist() == 255 or tmp_img[x][y - 1].tolist() == 255):#エッジ（白）ならば,幅は３
+			if(x >= tmp_img.shape[0]):
+				continue
+			elif(tmp_img[x][y].tolist() == 255 or tmp_img[x][y + 1].tolist() == 255 or tmp_img[x][y - 1].tolist() == 255):#エッジ（白）ならば,幅は３
 				tmp_point = np.array([x, y])#ベクトルを保存
 				min_point2 = tmp_point
 				break
@@ -316,7 +321,7 @@ def detect_figure(img):#重心を使って最短辺から最長辺を求める
 	
 	return max_point1, max_point2, min_point1, min_point2, long_axi, short_axi
 	
-def detect_edge(img):#どれだけ鋭い傷かを判定する
+def detect_edge(img):#形を求める
 	global tmp_point1, tmp_point2, x, y
 	tmp_img = edge_detection(img)
 	max_point1, max_point2, min_point1, min_point2, long_axi, short_axi = detect_figure(img)
@@ -376,7 +381,7 @@ def detect_edge(img):#どれだけ鋭い傷かを判定する
 			c = y + 1 / k * x
 			tmp_point1 = []
 			tmp_point2 = []
-			cv.drawMarker(img, (x, y), (255, 255, 255), markerType=cv.MARKER_TILTED_CROSS, markerSize=5)
+			#cv.drawMarker(img, (x, y), (255, 255, 255), markerType=cv.MARKER_TILTED_CROSS, markerSize=5)
 				
 			
 			
@@ -417,13 +422,13 @@ def detect_edge(img):#どれだけ鋭い傷かを判定する
 			
 			else:
 				#cv.drawMarker(img, (x, y), (255, 255, 255), markerType=cv.MARKER_TILTED_CROSS, markerSize=5)
-				cv.drawMarker(img, (tmp_point1[0], tmp_point1[1]), (i*15, 255, 25), markerType=cv.MARKER_TILTED_CROSS, markerSize=5)
-				cv.drawMarker(img, (tmp_point2[0], tmp_point2[1]), (i*15, 255, 25), markerType=cv.MARKER_TILTED_CROSS, markerSize=5)
+				#cv.drawMarker(img, (tmp_point1[0], tmp_point1[1]), (i*15, 255, 25), markerType=cv.MARKER_TILTED_CROSS, markerSize=5)
+				#cv.drawMarker(img, (tmp_point2[0], tmp_point2[1]), (i*15, 255, 25), markerType=cv.MARKER_TILTED_CROSS, markerSize=5)
 				size.append(round(np.linalg.norm(tmp_point1 - tmp_point2), 3))
 				distance.append(i)
 				
 	#print(size)
-	#cv.imshow("tmp_img",tmp_img)
+	cv.imshow("tmp_img",img)
 	
 	return size, distance, short_axi
 	
@@ -439,7 +444,7 @@ def oval_judge(img):
 	difference = abs((size - sin_y)*(size - sin_y))/short_axi/short_axi
 	#plt.plot(sin_x, difference, label="difference")
 	difference = sum(difference)/len(difference)#平均
-	print(difference)
+	#print(difference)
 	
 	if (difference <= 0.02):
 		return True
@@ -491,16 +496,134 @@ def sharp_judge(img):
 		
 	else:
 		return False
+		
+
+def contrast(image, a):#(aはゲイン)
+	image = cv.cvtColor(image, cv.COLOR_BGR2GRAY)#グレースケールに変換
+	lut = [ np.uint8(255.0 / (1 + math.exp(-a * (i - 128.) / 255.))) for i in range(256)] 
+	result_image = np.array( [ lut[value] for value in image.flat], dtype=np.uint8 )
+	result_image = result_image.reshape(image.shape)
+	return result_image
+
+
+def pullpush_judge(img):#文字列でpullかpushかを返します
+	global light_point, kaizoudo
+	gravity = find_gravity(img)#重心
+	img_list = []#9区画に分けた画像を保存
+	img_ave = []
+	result_list = []
 	
+	#照明の方向を検出
+	tmp_img = contrast(img, 10)#コントラストを上げる
+	width = tmp_img.shape[0]
+	height = tmp_img.shape[1]
+	w = int(round(width/3))
+	h = int(round(height/3))
 	
+	for i in range(3):#9区画に分けます
+		for j in range(3):
+			g = tmp_img[j * w : (j + 1) * w, i * h : (i + 1) * h]
+			img_list.append(g)
+	
+	#print(img_list)
+	
+	#平均の明るさを求める
+	for i in img_list:
+		ave = 0
+		for j in range(i.shape[0]):
+			ave += sum(i[j]) / len(i[j])
+			
+		img_ave.append(round(ave / i.shape[0], 3))
+	
+	#最も明るいマスを判定
+	num = img_ave.index(max(img_ave))
+	#cv.imshow("ligth", img_list[num])
+	
+	#最も明るいマスの中心と重心を結んだ直線を計算
+	if(num <= 2):
+		x = int(round(h / 2))
+		y = int(round(w * num % 3 + w / 2))
+	elif(num >= 6):
+		x = int(round(h / 2 + 2 * h))
+		y = int(round(w * num % 3 + w / 2))
+	else:
+		x = int(round(h / 2 + h))
+		y = int(round(w * num % 3 + w / 2))
+	
+	light_point = np.array([x, y])
+	#print(light_point)
+	#cv.drawMarker(tmp_img, (x, y), (0, 0, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
+	k = (gravity[1]/ light_point[1]) /(gravity[0]/ light_point[0]) 
+	b = gravity[1] - k * gravity[0]
+	
+	edge_img = edge_detection(img)
+	edge_point = []
+	
+	for i in range(height):
+		x = int(gravity[0] - (gravity[0] - light_point[0])/abs(gravity[0] - light_point[0])*i)
+		y = int(round(k * x + b))
+		
+		if(x < 0 or y < 0 or edge_img.shape[0] < x or edge_img.shape[1] < y):
+			break
+		
+		#cv.drawMarker(tmp_img, (x, y), (30, 0, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
+
+		if(edge_img[x][y].tolist() == 255 or edge_img[x+1][y].tolist() == 255 or edge_img[x-1][y].tolist() == 255):
+			print(str(x)+" , "+str(y))
+			cv.drawMarker(tmp_img, (x, y), (0, 0, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
+			edge_point = np.array([x, y])
+			break
+			
+	for i in range(int(10*img.shape[0]*img.shape[1]/40000)):
+		x1 = edge_point[0] + i
+		y1 = int(round(k * x1 + b))
+		x2 = edge_point[0] + i
+		y2 = int(round(k * x2 + b + 1))
+		x3 = edge_point[0] + i
+		y3 = int(round(k * x3 + b - 1))
+		
+		result = round((tmp_img[x1][y1] + tmp_img[x2][y2] + tmp_img[x3][y3])/3, 3)
+		result_list.append(result)
+	
+	result_list_x = [x for x in range(len(result_list))]
+	num = np.polyfit(result_list_x, result_list, 2)[0]
+	#plt.scatter(result_list_x, result_list, label="light", color="red")
+	#plt.plot(result_list_x, np.poly1d(np.polyfit(result_list_x, result_list, 2))(result_list_x), label="近似", color="red")
+	
+	#plt.show()
+	
+	if(num < 0):#上に凸なら
+		return "pull"
+		
+	else:
+		return "push"
+	
+	#cv.imshow("tmp_img",tmp_img)
+	#cv.imshow("img",img)
+	
+def judge(img):
+	gravity = find_gravity(img)
+	detect_figure(img)
+	
+	s = pullpush_judge(img)	
+	if(s == "pull"):
+		pull = True
+		push = False
+	else:
+		pull = False
+		push = True
+		
+	oval = oval_judge(img)
+	sharp = sharp_judge(img)
+	
+	return sharp, oval, pull, push
 
 if __name__ == '__main__':
 		img = cv.imread(path)
-		find_gravity(img)
-		detect_figure(img)
+		sharp, oval, pull, push = judge(img)
 		
-		#print(oval_judge(img))
-		print(sharp_judge(img))
+		print("鋭さ："+str(sharp)+"　円度："+ str(oval)+"　引き："+ str(pull)+"　押し："+ str(push))
+
 
 		#cv.drawMarker(img, (point1[0], point1[1]), (255, 0, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
 		#cv.drawMarker(img, (point2[0], point2[1]), (255, 0, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
