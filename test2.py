@@ -11,7 +11,7 @@ import math
 #path = "./sample/incision_1.jpg"
 
 #ノートパソコンで研究するとき
-path = "D:\Sotsuken\Sotsuken_repo./sample/incision_1.jpg"
+path = "D:\Sotsuken\Sotsuken_repo./sample/incision_3.jpg"
 
 N = 1000
 
@@ -106,8 +106,90 @@ def separate(img):#16区画に分ける
 	#		cv.imshow("separate_"+ str(i), img[(i-1)*width : i* width, (j-1)*height: j* height])
 	#
 
+def img_gfilter(img):#重心検索用
+	tmp_img = cv.cvtColor(img, cv.COLOR_BGR2GRAY)#グレースケールに変換
+	tmp_img = cv.GaussianBlur(tmp_img, (5, 5), 3)#ガウシアンフィルタ
+	tmp_img = cv.GaussianBlur(tmp_img, (5, 5), 3)#ガウシアンフィルタ
+	tmp_img = cv.bilateralFilter(tmp_img, 15, 20, 20)#バイラテラルフィルタをかける
+	tmp_img = cv.GaussianBlur(tmp_img, (5, 5), 3)#ガウシアンフィルタ
+	return tmp_img
+	
+def find_gravity(img):#グラフカットをもちいた重心の検索
+	#スレッショルド設定
+	THRESH_MIN, THRESH_MAX = (160, 255)
+	TRESH_MODE = cv.THRESH_BINARY_INV
+	
+	#フィルター設定
+	AA = (1001, 1001)
+	CONTRAST = 1.1
+	SHARPNESS = 1.5
+	BRIGHTNESS = 1.1
+	SATURATION = 1.0
+	GAMMA = 1.0
+	
+	#グラフカット処理
+	img_gray = img_gfilter(img)
+	img_bin = cv.threshold(img_gray, THRESH_MIN, THRESH_MAX, TRESH_MODE)[1]
+	
+	#二値化画像からマスク画像を生成
+	img_mask = cv.merge((img_bin, img_bin, img_bin))
+	
+	#マスク画像からshapeで矩形を囲い、その座標を取得
+	mask_rows, mask_cols, mask_channel = img_mask.shape
+	min_x = mask_cols
+	min_y = mask_rows
+	max_x = 0
+	max_y = 0
+	
+	for y in range(mask_rows):
+		for x in range(mask_cols):
+			if all(img_mask[y, x] == 255):
+				if x < min_x:
+					min_x = x
+				elif x > max_x:
+					max_x = x
+				if y < min_y:
+					min_y = y
+				elif y > max_y:
+					max_y = y
+	
+	rect_x = min_x
+	rect_y = min_y
+	rect_w = max_x - min_x
+	rect_h = max_y - min_y
+	
+	#前提マスクデータ格納準備
+	mask = np.zeros(img.shape[:2], np.uint8)
+	
+	#前景領域データ、背景領域データ格納準備
+	bg_model = np.zeros((1, 65), np.float64)
+	fg_model = np.zeros((1, 65), np.float64)
+	
+	#前景画像の矩形領域設定
+	rect = (int(img.shape[1]/4), int(img.shape[0]/3),  img.shape[1] - int(img.shape[1]/3), img.shape[0] - int(img.shape[0]/4))
+	
+	#矩形グラフカットデータ化
+	cv.grabCut(img, mask, rect, bg_model, fg_model, 5, cv.GC_INIT_WITH_RECT)
+	
+	#領域分割
+	#0:矩形外→０
+	#1:矩形内（グラフカットによる背景かもしれない領域）→０
+	#2:矩形内（前景確定）→１
+	#3:矩形内（グラフカットによる前景かもしれない領域）→１
+	
+	mask2 = np.where((mask == 2) | (mask == 0), 0, 1).astype('uint8')
+	
+	#グラフカット処理
+	img_grab = img * mask2[:, :, np.newaxis]
+	
+	cv.imshow("gray", img_bin)
+	cv.imshow("grab", img_grab)
+	
+	
+	return 0
 
-def find_gravity(img):#傷の重心を探す関数
+
+def find_gravity_b(img):#傷の重心を探す関数
 	global tmp_img, width, height, x1, x2, y1, y2, N#画像処理のための一時的な保管場所
 	global tmp_img_re, list_sepa, binary_image#２値画像
 	global point_dict, point1, point2, g_point, tmp_x, tmp_y
@@ -195,6 +277,8 @@ def find_gravity(img):#傷の重心を探す関数
 
 
 def detect_figure(img):#重心を使って最短辺から最長辺を求める
+	find_gravity(img)
+	find_gravity_b(img)
 	global tmp_img, g_point, min_point1,min_point2, max_point1, max_point2, tmp_point1, tmp_point2
 	global short_axi, long_axi#最短辺,最長辺
 	global x , y, k, b#係数と変数
@@ -256,12 +340,6 @@ def detect_figure(img):#重心を使って最短辺から最長辺を求める
 		#print(str(tmp_point1) +" , "+ str(tmp_point2))
 		tmp_point1 = np.array(tmp_point1)
 		tmp_point2 = np.array(tmp_point2)
-		if(short_axi > round(np.linalg.norm(tmp_point1 - tmp_point2))):
-			min_point1 = tmp_point1
-			min_point2 = tmp_point2
-			short_axi = round(np.linalg.norm(tmp_point1 - tmp_point2))
-			print(str(tmp_point1) +" , "+ str(tmp_point2))
-			print("short : "+ str(short_axi))
 			
 		if(long_axi < round(np.linalg.norm(tmp_point1 - tmp_point2))):
 			max_point1 = tmp_point1
@@ -274,17 +352,16 @@ def detect_figure(img):#重心を使って最短辺から最長辺を求める
 
 if __name__ == '__main__':
 		img = cv.imread(path)
-		find_gravity(img)
 		detect_figure(img)
 
 		#cv.drawMarker(img, (point1[0], point1[1]), (255, 0, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
 		#cv.drawMarker(img, (point2[0], point2[1]), (255, 0, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
 		cv.drawMarker(img, (g_point[0], g_point[1]), (0, 255, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
-		cv.drawMarker(img, (min_point1[0], min_point1[1]), (0, 255, 255), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
-		cv.drawMarker(img, (min_point2[0], min_point2[1]), (0, 255, 255), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
-		cv.drawMarker(img, (max_point1[0], max_point1[1]), (255, 255, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
-		cv.drawMarker(img, (max_point2[0], max_point2[1]), (255, 255, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
-		cv.imshow("incision1",img)
-		cv.imshow("incision2",tmp_img)
-		cv.imshow("incision3",binary_image)
+		#cv.drawMarker(img, (min_point1[0], min_point1[1]), (0, 255, 255), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
+		#cv.drawMarker(img, (min_point2[0], min_point2[1]), (0, 255, 255), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
+		#cv.drawMarker(img, (max_point1[0], max_point1[1]), (255, 255, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
+		#cv.drawMarker(img, (max_point2[0], max_point2[1]), (255, 255, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
+		#cv.imshow("incision1",img)
+		#cv.imshow("incision2",tmp_img)
+		#cv.imshow("incision3",binary_image)
 		cv.waitKey()
