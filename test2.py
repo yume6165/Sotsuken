@@ -11,9 +11,43 @@ import math
 #path = "./sample/incision_1.jpg"
 
 #ノートパソコンで研究するとき
-path = "D:\Sotsuken\Sotsuken_repo./sample/incision_3.jpg"
+path = "D:\Sotsuken\Sotsuken_repo./sample/incision_1.jpg"
 
 N = 1000
+
+
+def find_gravity_r(img):#HSVカラーモデルから重心を探す
+	hsv = cv.cvtColor(img, cv.COLOR_BGR2HSV_FULL)
+	h = hsv[:, :, 0]#色相(赤の範囲は256段階の200～20と定義するfromhttps://qiita.com/odaman68000/items/ae28cf7bdaf4fa13a65b)
+	s = hsv[:, :, 1]
+	mask = np.zeros(h.shape, dtype=np.uint8)
+	mask[((h < 20) | (h > 200)) & (s > 128)] = 255
+	
+	#輪郭を作るうえで塊ごとに配列化する
+	contours, _ = cv.findContours(mask, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
+	
+	rects = []
+	for contour in contours:#contourには輪郭をなすピクセルの情報が入っている
+		approx = cv.convexHull(contour)#凸凹のある塊を内包する凸上の形状を算出して２Dポリゴンに
+		rect = cv.boundingRect(approx)#袋状になったポリゴンがすっぽり入る四角を計算する
+		rects.append(np.array(rect))
+		
+	#for rect in rects:
+	#	cv.rectangle(img, tuple(rect[0:2]), tuple(rect[0:2] + rect[2:4]), (0, 0, 255), thickness=2)
+	#	cv.imshow('red', img)
+		
+	#最大の四角を見つける
+	result_rect = max(rects, key=(lambda x: x[2] * x[3]))
+			
+	#cv.rectangle(img, tuple(result_rect[0:2]), tuple(result_rect[0:2] + result_rect[2:4]), (0, 255, 0), thickness=2)
+	#print(result_rect)
+	re_img = img[ result_rect[1] : result_rect[1] + result_rect[3], result_rect[0] : result_rect[0] + result_rect[2]]
+	x = result_rect[0] + int(round(result_rect[2]/2))
+	y = result_rect[1] + int(round(result_rect[3]/2))
+	#cv.imshow('re_red', re_img)
+	g_point = np.array([x, y])
+	
+	return g_point
 
 def equal_list(lst1, lst2):
     lst = list(str(lst1))
@@ -352,7 +386,8 @@ def detect_figure(img):#重心を使って最短辺から最長辺を求める
 
 if __name__ == '__main__':
 		img = cv.imread(path)
-		detect_figure(img)
+		#detect_figure(img)
+		g_point = find_gravity_r(img)
 
 		#cv.drawMarker(img, (point1[0], point1[1]), (255, 0, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
 		#cv.drawMarker(img, (point2[0], point2[1]), (255, 0, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
@@ -361,7 +396,7 @@ if __name__ == '__main__':
 		#cv.drawMarker(img, (min_point2[0], min_point2[1]), (0, 255, 255), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
 		#cv.drawMarker(img, (max_point1[0], max_point1[1]), (255, 255, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
 		#cv.drawMarker(img, (max_point2[0], max_point2[1]), (255, 255, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
-		#cv.imshow("incision1",img)
+		cv.imshow("incision1",img)
 		#cv.imshow("incision2",tmp_img)
 		#cv.imshow("incision3",binary_image)
 		cv.waitKey()

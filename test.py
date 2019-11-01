@@ -117,6 +117,40 @@ def separate(img):#16区画に分ける
 	#
 
 
+def find_gravity_r(img):#HSVカラーモデルから重心を探す
+	hsv = cv.cvtColor(img, cv.COLOR_BGR2HSV_FULL)
+	h = hsv[:, :, 0]#色相(赤の範囲は256段階の200～20と定義するfromhttps://qiita.com/odaman68000/items/ae28cf7bdaf4fa13a65b)
+	s = hsv[:, :, 1]
+	mask = np.zeros(h.shape, dtype=np.uint8)
+	mask[((h < 20) | (h > 200)) & (s > 128)] = 255
+	
+	#輪郭を作るうえで塊ごとに配列化する
+	contours, _ = cv.findContours(mask, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
+	
+	rects = []
+	for contour in contours:#contourには輪郭をなすピクセルの情報が入っている
+		approx = cv.convexHull(contour)#凸凹のある塊を内包する凸上の形状を算出して２Dポリゴンに
+		rect = cv.boundingRect(approx)#袋状になったポリゴンがすっぽり入る四角を計算する
+		rects.append(np.array(rect))
+		
+	#for rect in rects:
+	#	cv.rectangle(img, tuple(rect[0:2]), tuple(rect[0:2] + rect[2:4]), (0, 0, 255), thickness=2)
+	#	cv.imshow('red', img)
+		
+	#最大の四角を見つける
+	result_rect = max(rects, key=(lambda x: x[2] * x[3]))
+			
+	#cv.rectangle(img, tuple(result_rect[0:2]), tuple(result_rect[0:2] + result_rect[2:4]), (0, 255, 0), thickness=2)
+	#print(result_rect)
+	re_img = img[ result_rect[1] : result_rect[1] + result_rect[3], result_rect[0] : result_rect[0] + result_rect[2]]
+	x = result_rect[0] + int(round(result_rect[2]/2))
+	y = result_rect[1] + int(round(result_rect[3]/2))
+	#cv.imshow('re_red', re_img)
+	g_point = np.array([x, y])
+	
+	return g_point
+
+
 def find_gravity(img):#傷の重心を探す関数
 	global tmp_img, width, height, x1, x2, y1, y2, N#画像処理のための一時的な保管場所
 	global tmp_img_re, list_sepa, binary_image#２値画像
