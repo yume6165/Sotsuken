@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 #path = "./sample/incision_1.jpg"
 
 #ノートパソコンで研究するとき
-path = "D:\Sotsuken\Sotsuken_repo./sample/incision_1.jpg"
+path = "D:\Sotsuken\Sotsuken_repo./sample/incision_3.jpg"
 
 N = 1000
 
@@ -267,7 +267,7 @@ def detect_edge(img):#形を求める
 			for j in range(int(round(long_axi))):
 				x1 = x
 				y1 = y + j
-				print(str(x1)+", "+str(y1))
+				#print(str(x1)+", "+str(y1))
 				#cv.drawMarker(img_edge, (x1, y1), (255, 255, 255), markerType=cv.MARKER_TILTED_CROSS, markerSize=5)
 				
 				
@@ -305,11 +305,11 @@ def detect_edge(img):#形を求める
 					
 			if(tmp_point1 != [] and tmp_point2 != []):
 				print(round(np.linalg.norm(tmp_point1 - tmp_point2)))
-				cv.drawMarker(img_edge, (x, y), (255, 255, 255), markerType=cv.MARKER_TILTED_CROSS, markerSize=5)
-				cv.drawMarker(img_edge, (tmp_point1[0], tmp_point1[1]), (i*15, 255, 25), markerType=cv.MARKER_TILTED_CROSS, markerSize=5)
-				cv.drawMarker(img_edge, (tmp_point2[0], tmp_point2[1]), (i*15, 255, 25), markerType=cv.MARKER_TILTED_CROSS, markerSize=5)
-				cv.drawMarker(img_edge, tuple(max_point1), (0, 0, 255), markerType=cv.MARKER_TILTED_CROSS, markerSize=5)
-				cv.drawMarker(img_edge, tuple(max_point2), (0, 0, 255), markerType=cv.MARKER_TILTED_CROSS, markerSize=5)
+				#cv.drawMarker(img_edge, (x, y), (255, 255, 255), markerType=cv.MARKER_TILTED_CROSS, markerSize=5)
+				#cv.drawMarker(img_edge, (tmp_point1[0], tmp_point1[1]), (i*15, 255, 25), markerType=cv.MARKER_TILTED_CROSS, markerSize=5)
+				#cv.drawMarker(img_edge, (tmp_point2[0], tmp_point2[1]), (i*15, 255, 25), markerType=cv.MARKER_TILTED_CROSS, markerSize=5)
+				#cv.drawMarker(img_edge, tuple(max_point1), (0, 0, 255), markerType=cv.MARKER_TILTED_CROSS, markerSize=5)
+				#cv.drawMarker(img_edge, tuple(max_point2), (0, 0, 255), markerType=cv.MARKER_TILTED_CROSS, markerSize=5)
 				
 				size.append(round(np.linalg.norm(tmp_point1 - tmp_point2), 3))
 				distance.append(i)
@@ -369,11 +369,11 @@ def detect_edge(img):#形を求める
 					
 			if(tmp_point1 != [] and tmp_point2 != []):
 				print(round(np.linalg.norm(tmp_point1 - tmp_point2)))
-				cv.drawMarker(img_edge, (x, y), (255, 255, 255), markerType=cv.MARKER_TILTED_CROSS, markerSize=5)
-				cv.drawMarker(img_edge, (tmp_point1[0], tmp_point1[1]), (i*15, 255, 25), markerType=cv.MARKER_TILTED_CROSS, markerSize=5)
-				cv.drawMarker(img_edge, (tmp_point2[0], tmp_point2[1]), (i*15, 255, 25), markerType=cv.MARKER_TILTED_CROSS, markerSize=5)
-				cv.drawMarker(img_edge, tuple(max_point1), (0, 0, 255), markerType=cv.MARKER_TILTED_CROSS, markerSize=5)
-				cv.drawMarker(img_edge, tuple(max_point2), (0, 0, 255), markerType=cv.MARKER_TILTED_CROSS, markerSize=5)
+				#cv.drawMarker(img_edge, (x, y), (255, 255, 255), markerType=cv.MARKER_TILTED_CROSS, markerSize=5)
+				#cv.drawMarker(img_edge, (tmp_point1[0], tmp_point1[1]), (i*15, 255, 25), markerType=cv.MARKER_TILTED_CROSS, markerSize=5)
+				#cv.drawMarker(img_edge, (tmp_point2[0], tmp_point2[1]), (i*15, 255, 25), markerType=cv.MARKER_TILTED_CROSS, markerSize=5)
+				#cv.drawMarker(img_edge, tuple(max_point1), (0, 0, 255), markerType=cv.MARKER_TILTED_CROSS, markerSize=5)
+				#cv.drawMarker(img_edge, tuple(max_point2), (0, 0, 255), markerType=cv.MARKER_TILTED_CROSS, markerSize=5)
 				
 				size.append(round(np.linalg.norm(tmp_point1 - tmp_point2), 3))
 				distance.append(i)
@@ -433,11 +433,11 @@ def detect_edge(img):#形を求める
 			
 			if(tmp_point1 != [] and tmp_point2 != []):
 				print(round(np.linalg.norm(tmp_point1 - tmp_point2)))
-				cv.drawMarker(img_edge, (x, y), (255, 255, 255), markerType=cv.MARKER_TILTED_CROSS, markerSize=5)
-				cv.drawMarker(img_edge, max_point1, (0, 0, 255), markerType=cv.MARKER_TILTED_CROSS, markerSize=5)
-				cv.drawMarker(img_edge, max_point2, (0, 0, 255), markerType=cv.MARKER_TILTED_CROSS, markerSize=5)
-				cv.drawMarker(img_edge, (tmp_point1[0], tmp_point1[1]), (i*15, 255, 25), markerType=cv.MARKER_TILTED_CROSS, markerSize=5)
-				cv.drawMarker(img_edge, (tmp_point2[0], tmp_point2[1]), (i*15, 255, 25), markerType=cv.MARKER_TILTED_CROSS, markerSize=5)
+				#cv.drawMarker(img_edge, (x, y), (255, 255, 255), markerType=cv.MARKER_TILTED_CROSS, markerSize=5)
+				#cv.drawMarker(img_edge, max_point1, (0, 0, 255), markerType=cv.MARKER_TILTED_CROSS, markerSize=5)
+				#cv.drawMarker(img_edge, max_point2, (0, 0, 255), markerType=cv.MARKER_TILTED_CROSS, markerSize=5)
+				#cv.drawMarker(img_edge, (tmp_point1[0], tmp_point1[1]), (i*15, 255, 25), markerType=cv.MARKER_TILTED_CROSS, markerSize=5)
+				#cv.drawMarker(img_edge, (tmp_point2[0], tmp_point2[1]), (i*15, 255, 25), markerType=cv.MARKER_TILTED_CROSS, markerSize=5)
 				size.append(round(np.linalg.norm(tmp_point1 - tmp_point2), 3))
 				distance.append(i)
 				
@@ -447,9 +447,9 @@ def detect_edge(img):#形を求める
 			
 				
 	#print(size)
-	cv.drawMarker(img_edge, (g_point[0], g_point[1]), (0, 255, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
-	cv.imshow("edge",img_edge)
-	cv.imshow("img",tmp_img)
+	#cv.drawMarker(img_edge, (g_point[0], g_point[1]), (0, 255, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
+	#cv.imshow("edge",img_edge)
+	#cv.imshow("img",tmp_img)
 	return size, distance, short_axi
 	
 
@@ -530,7 +530,7 @@ def contrast(image, a):#(aはゲイン)
 
 def pullpush_judge(img):#文字列でpullかpushかを返します
 	global light_point, kaizoudo
-	gravity = find_gravity(img)#重心
+	gravity = find_gravity_r(img)#重心
 	img_list = []#9区画に分けた画像を保存
 	img_ave = []
 	result_list = []
@@ -573,58 +573,185 @@ def pullpush_judge(img):#文字列でpullかpushかを返します
 		y = int(round(w * num % 3 + w / 2))
 	
 	light_point = np.array([x, y])
-	#print(light_point)
 	#cv.drawMarker(tmp_img, (x, y), (0, 0, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
-	k = (gravity[1]/ light_point[1]) /(gravity[0]/ light_point[0]) 
+	k = (gravity[1] - light_point[1]) /(gravity[0] - light_point[0]) 
 	b = gravity[1] - k * gravity[0]
 	
 	edge_img = edge_detection(img)
 	edge_point = []
 	
-	for i in range(height):
-		y = int(gravity[0] - (gravity[0] - light_point[0])/abs(gravity[0] - light_point[0])*i)
-		x = int(round(k * y + b))
-		
-		if(x < 0 or y < 0 or edge_img.shape[0] < x or edge_img.shape[1] < y):
-			continue
-		
-		#cv.drawMarker(tmp_img, (x, y), (30, 0, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
+	#print(gravity)
+	#print(light_point)
+	#cv.drawMarker(tmp_img, tuple(light_point), (30, 0, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
 
-		if(edge_img[x][y].tolist() == 255 or edge_img[x+1][y].tolist() == 255 or edge_img[x-1][y].tolist() == 255):
-			print(str(x)+" , "+str(y))
-			cv.drawMarker(tmp_img, (x, y), (0, 0, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
-			edge_point = np.array([y, x])
-			break
-			
-	if(len(edge_point) == 0):
-		return "Error"
-			
-	for i in range(int(10*img.shape[0]*img.shape[1]/40000)):
-		x1 = edge_point[0] + i
-		y1 = int(round(k * x1 + b))
-		x2 = edge_point[0] + i
-		y2 = int(round(k * x2 + b + 1))
-		x3 = edge_point[0] + i
-		y3 = int(round(k * x3 + b - 1))
+	if(gravity[0] == light_point[0] and gravity[1] > light_point[1]):#縦に並んだ時
+		for i in range(height):
+			x = gravity[0]
+			y = gravity[1] + i
 		
-		result = round((tmp_img[y1][x1] + tmp_img[y2][x2] + tmp_img[y3][x3])/3, 3)
-		result_list.append(result)
+			if(x < 0 or y < 0 or edge_img.shape[1] < x or edge_img.shape[0] < y):
+				continue
+		
+			#cv.drawMarker(tmp_img, (x, y), (30, 0, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
+
+			if(edge_img[y][x].tolist() == 255 or edge_img[y+1][x].tolist() == 255 or edge_img[y-1][x].tolist() == 255):
+				print(str(x)+" , "+str(y))
+				cv.drawMarker(tmp_img, (x, y), (0, 0, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
+				edge_point = np.array([x, y])
+				break
+			
+		if(len(edge_point) == 0):
+			return "Error"
+			
+		for i in range(int(10*img.shape[0]*img.shape[1]/40000)):
+			x1 = edge_point[0]
+			y1 = edge_point[1] + i
+			x2 = edge_point[0] - 1
+			y2 = edge_point[1] + i
+			x3 = edge_point[0] + 1
+			y3 = edge_point[1] + i
+		
+			result = round((tmp_img[y1][x1] + tmp_img[y2][x2] + tmp_img[y3][x3])/3, 3)
+			result_list.append(result)
+	
+	elif(gravity[0] == light_point[0] and gravity[1] <= light_point[1]):#縦に並んだ時
+		for i in range(height):
+			x = gravity[0]
+			y = gravity[1] - i
+		
+			if(x < 0 or y < 0 or edge_img.shape[1] < x or edge_img.shape[0] < y):
+				continue
+		
+			#cv.drawMarker(tmp_img, (x, y), (30, 0, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
+
+			if(edge_img[y][x].tolist() == 255 or edge_img[y+1][x].tolist() == 255 or edge_img[y-1][x].tolist() == 255):
+				print(str(x)+" , "+str(y))
+				cv.drawMarker(tmp_img, (x, y), (0, 0, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
+				edge_point = np.array([x, y])
+				break
+			
+		if(len(edge_point) == 0):
+			return "Error"
+			
+		for i in range(int(10*img.shape[0]*img.shape[1]/40000)):
+			x1 = edge_point[0] + i
+			y1 = edge_point[1]
+			x2 = edge_point[0] + i
+			y2 = edge_point[1] - 1
+			x3 = edge_point[0] + i
+			y3 = edge_point[1] + 1
+		
+			result = round((tmp_img[y1][x1] + tmp_img[y2][x2] + tmp_img[y3][x3])/3, 3)
+			result_list.append(result)
+		
+	elif(abs(k) < 1 and gravity[0] < light_point[0]):#横に並んだ時
+		for i in range(height):
+			x = gravity[0] - i
+			y = gravity[1]
+		
+			if(x < 0 or y < 0 or edge_img.shape[1] < x or edge_img.shape[0] < y):
+				continue
+		
+			#cv.drawMarker(tmp_img, (x, y), (30, 0, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
+
+			if(edge_img[y][x].tolist() == 255 or edge_img[y+1][x].tolist() == 255 or edge_img[y-1][x].tolist() == 255):
+				print(str(x)+" , "+str(y))
+				cv.drawMarker(tmp_img, (x, y), (0, 0, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
+				edge_point = np.array([x, y])
+				break
+			
+		if(len(edge_point) == 0):
+			return "Error"
+			
+		for i in range(int(10*img.shape[0]*img.shape[1]/40000)):
+			x1 = edge_point[0] + i
+			y1 = int(round(k * x1 + b))
+			x2 = edge_point[0] + i
+			y2 = int(round(k * x2 + b + 1))
+			x3 = edge_point[0] + i
+			y3 = int(round(k * x3 + b - 1))
+		
+			result = round((tmp_img[y1][x1] + tmp_img[y2][x2] + tmp_img[y3][x3])/3, 3)
+			result_list.append(result)
+			
+	elif(abs(k) < 1 and gravity[0] >= light_point[0]):#横に並んだ時
+		for i in range(height):
+			x = gravity[0] + i
+			y = gravity[1]
+		
+			if(x < 0 or y < 0 or edge_img.shape[1] < x or edge_img.shape[0] < y):
+				continue
+		
+			#cv.drawMarker(tmp_img, (x, y), (30, 0, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
+
+			if(edge_img[y][x].tolist() == 255 or edge_img[y+1][x].tolist() == 255 or edge_img[y-1][x].tolist() == 255):
+				print(str(x)+" , "+str(y))
+				#cv.drawMarker(tmp_img, (x, y), (0, 0, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
+				edge_point = np.array([x, y])
+				break
+			
+		if(len(edge_point) == 0):
+			return "Error"
+			
+		for i in range(int(10*img.shape[0]*img.shape[1]/40000)):
+			x1 = edge_point[0] + i
+			y1 = int(round(k * x1 + b))
+			x2 = edge_point[0] + i
+			y2 = int(round(k * x2 + b + 1))
+			x3 = edge_point[0] + i
+			y3 = int(round(k * x3 + b - 1))
+		
+			result = round((tmp_img[y1][x1] + tmp_img[y2][x2] + tmp_img[y3][x3])/3, 3)
+			result_list.append(result)
+	
+	else:
+		for i in range(height):
+			if(gravity[0] >= light_point[0]):
+				x = gravity[0] + i
+			else:
+				x = gravity[0] - i
+			y = int(round(k * x + b))
+			print(x)
+			print(y)
+			if(x < 0 or y < 1 or edge_img.shape[1] < x or edge_img.shape[0] < y):
+				continue
+		
+			cv.drawMarker(tmp_img, (x, y), (30, 0, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
+			
+			if(edge_img[y][x].tolist() == 255 or edge_img[y+1][x].tolist() == 255 or edge_img[y-1][x].tolist() == 255):
+				print(str(x)+" , "+str(y))
+				cv.drawMarker(tmp_img, (x, y), (0, 0, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
+				edge_point = np.array([x, y])
+				break
+			
+		if(len(edge_point) == 0):
+			return "Error"
+			
+		for i in range(int(10*img.shape[0]*img.shape[1]/40000)):
+			x1 = edge_point[0] + i
+			y1 = int(round(k * x1 + b))
+			x2 = edge_point[0] + i
+			y2 = int(round(k * x2 + b + 1))
+			x3 = edge_point[0] + i
+			y3 = int(round(k * x3 + b - 1))
+		
+			result = round((tmp_img[y1][x1] + tmp_img[y2][x2] + tmp_img[y3][x3])/3, 3)
+			result_list.append(result)
 	
 	result_list_x = [x for x in range(len(result_list))]
 	num = np.polyfit(result_list_x, result_list, 2)[0]
 	plt.scatter(result_list_x, result_list, label="light", color="red")
 	plt.plot(result_list_x, np.poly1d(np.polyfit(result_list_x, result_list, 2))(result_list_x), label="近似", color="red")
-	
-	#plt.show()
+	cv.imshow("tmp_img",tmp_img)
+	cv.imshow("img",img)
+	plt.show()
 	
 	if(num < 0):#上に凸なら
-		return "pull"
+		return "push"
 		
 	else:
-		return "push"
+		return "pull"
 	
-	#cv.imshow("tmp_img",tmp_img)
-	#cv.imshow("img",img)
 	
 def judge(img):
 	sharp = False
@@ -635,16 +762,16 @@ def judge(img):
 	detect_figure(img)
 	detect_edge(img)
 	
-	#s = pullpush_judge(img)	
-	#if(s == "pull"):
-	#	pull = True
-	#	push = False
-	#elif(s == "push"):
-	#	pull = False
-	#	push = True
-	#else:
-	#	pull = False
-	#	push = False
+	s = pullpush_judge(img)	
+	if(s == "pull"):
+		pull = True
+		push = False
+	elif(s == "push"):
+		pull = False
+		push = True
+	else:
+		pull = False
+		push = False
 		
 	#oval = oval_judge(img)
 	#sharp = sharp_judge(img)
