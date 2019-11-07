@@ -7,12 +7,13 @@ from PIL import Image
 import numpy as np
 import math
 import matplotlib.pyplot as plt
+import glob
 
 #研究室で研究するとき
 #path = "./sample/incision_1.jpg"
 
 #ノートパソコンで研究するとき
-path = "D:\Sotsuken\Sotsuken_repo./sample/incision_3.jpg"
+path = "D:\Sotsuken\Sotsuken_repo\sample\\*"
 
 N = 1000
 
@@ -86,20 +87,12 @@ def detect_figure(img):#重心を使って最短辺から最長辺を求める
 	max_point2 = []
 	dir = 0
 
-	#Harrisのコーナー検出(使ってない)
-	gray = np.float32(tmp_img)
-	dst = cv.cornerHarris(gray, 2, 3, 0.01)
-	dst = cv.dilate(dst, None)
-	#print(dst)
-	#img[dst>0.01*dst.max()]=[255, 0,0]
-	#cv.drawMarker(img, (g_point[0], g_point[1]), (255, 255, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=5)	
-	#cv.imshow("img", tmp_img)
+	
 	#最短辺を求める
 	#重心から最も近いエッジを検出
 	for i in range(tmp_img.shape[0]):#多分縦方向
 		for j in range(tmp_img.shape[1]):#多分横方向
-			#print(tmp_img[dst>0.01*dst.max()])
-			#print(tmp_img[i][j].tolist())
+			
 			if(tmp_img[i][j].tolist() == 255):#エッジ（白）ならば
 				tmp_point = np.array([j, i])#ベクトルを保存
 
@@ -159,7 +152,7 @@ def detect_figure(img):#重心を使って最短辺から最長辺を求める
 				if(x >= tmp_img.shape[1] + 1):
 					continue
 				elif(y < 0 or y >= tmp_img.shape[0] + 2):
-					contnue
+					continue
 				elif(tmp_img[y][x].tolist() == 255 or tmp_img[y][x + 1].tolist() == 255 or tmp_img[y][x - 1].tolist() == 255):#エッジ（白）ならば,幅は３
 					tmp_point = np.array([x, y])#ベクトルを保存
 					min_point2 = tmp_point
@@ -253,8 +246,8 @@ def detect_edge(img):#形を求める
 	distance = []
 	sin_x = []
 	sin_y = []
-	print(max_point1)
-	print(max_point2)
+	#print(max_point1)
+	#print(max_point2)
 	
 	if(abs(k) < 1):#傾きが小さく殆ど水平の時　x= g_point[0]）
 		for i in range(int(long_axi)):
@@ -304,7 +297,7 @@ def detect_edge(img):#形を求める
 						break
 					
 			if(tmp_point1 != [] and tmp_point2 != []):
-				print(round(np.linalg.norm(tmp_point1 - tmp_point2)))
+				#print(round(np.linalg.norm(tmp_point1 - tmp_point2)))
 				#cv.drawMarker(img_edge, (x, y), (255, 255, 255), markerType=cv.MARKER_TILTED_CROSS, markerSize=5)
 				#cv.drawMarker(img_edge, (tmp_point1[0], tmp_point1[1]), (i*15, 255, 25), markerType=cv.MARKER_TILTED_CROSS, markerSize=5)
 				#cv.drawMarker(img_edge, (tmp_point2[0], tmp_point2[1]), (i*15, 255, 25), markerType=cv.MARKER_TILTED_CROSS, markerSize=5)
@@ -511,7 +504,7 @@ def sharp_judge(img):
 	#plt.plot(cos_x, cos_y, label="cos", color="green")
 	#plt.plot(distance, np.poly1d(np.polyfit(distance, size, 2))(distance), label="近似", color="red")
 	#cv.imshow("img",img)
-	plt.show()
+	#plt.show()
 	
 	if((fw_result + bw_result) / 2 < 0.5):#0.5未満ならシャープ
 		return True
@@ -574,8 +567,10 @@ def pullpush_judge(img):#文字列でpullかpushかを返します
 	
 	light_point = np.array([x, y])
 	#cv.drawMarker(tmp_img, (x, y), (0, 0, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
-	k = (gravity[1] - light_point[1]) /(gravity[0] - light_point[0]) 
-	b = gravity[1] - k * gravity[0]
+	
+	if(gravity[0] != light_point[0]):
+		k = (gravity[1] - light_point[1]) /(gravity[0] - light_point[0]) 
+		b = gravity[1] - k * gravity[0]
 	
 	edge_img = edge_detection(img)
 	edge_point = []
@@ -775,15 +770,26 @@ def judge(img):
 		
 	oval = oval_judge(img)
 	sharp = sharp_judge(img)
+	print("鋭さ："+str(sharp)+"　円度："+ str(oval)+"　引き："+ str(pull)+"　押し："+ str(push))
 	
 	return sharp, oval, pull, push
+	
+	
+def readimg(folder):#フォルダを指定して
+	files = glob.glob(folder)
+	for file in files:
+		#print(file)
+		img = cv.imread(file, cv.IMREAD_COLOR)
+		judge(img)
+		
 
 if __name__ == '__main__':
-		img = cv.imread(path)
-		img_edge = cv.imread(path)
-		sharp, oval, pull, push = judge(img)
+	readimg(path)
+		#img = cv.imread(path)
+		#img_edge = cv.imread(path)
+		#judge(img)
 		
-		print("鋭さ："+str(sharp)+"　円度："+ str(oval)+"　引き："+ str(pull)+"　押し："+ str(push))
+		
 		
 		#gravity = find_gravity(img)
 		#detect_figure(img)
@@ -799,4 +805,4 @@ if __name__ == '__main__':
 		#cv.imshow("incision1",img)
 		#cv.imshow("incision2",tmp_img)
 		#cv.imshow("incision3",binary_image)
-		cv.waitKey()
+	cv.waitKey()
