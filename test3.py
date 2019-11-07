@@ -113,7 +113,7 @@ def detect_figure(img):#重心を使って最短辺から最長辺を求める
 	if(g_point[0] == min_point1[0]):
 		x = g_point[0]
 		
-		cv.drawMarker(img, (min_point1[0], min_point1[1]), (0, 255, 255), markerType=cv.MARKER_TILTED_CROSS, markerSize=5)
+		#cv.drawMarker(img, (min_point1[0], min_point1[1]), (0, 255, 255), markerType=cv.MARKER_TILTED_CROSS, markerSize=5)
 		#cv.imshow("min_point",img)
 		
 		if(min_point1[1] < g_point[1]):#最短点からみて重心の反対側を探す
@@ -144,7 +144,7 @@ def detect_figure(img):#重心を使って最短辺から最長辺を求める
 	else:
 		k = (g_point[1] - min_point1[1]) / (g_point[0] - min_point1[0])
 		b = g_point[1] - k * g_point[0]
-		print("k is "+str(k)+" , b is"+str(b))
+		#print("k is "+str(k)+" , b is"+str(b))
 		#print(min_point1)
 		#print(g_point)
 
@@ -315,7 +315,7 @@ def detect_edge(img):#形を求める
 				distance.append(i)
 				
 			elif(tmp_point1 == [] or tmp_point2 == []):
-				print("Skip")
+				#print("Skip")
 				continue
 		
 		
@@ -332,7 +332,7 @@ def detect_edge(img):#形を求める
 				x1 = int(x + j)
 				y1 = int(round(-1 / k * x1 + c))
 				print(str(x1)+", "+str(y1))
-				cv.drawMarker(img_edge, (x1, y1), (255, 255, 255), markerType=cv.MARKER_TILTED_CROSS, markerSize=5)
+				#cv.drawMarker(img_edge, (x1, y1), (255, 255, 255), markerType=cv.MARKER_TILTED_CROSS, markerSize=5)
 				
 				
 				if(y1 < 1 or tmp_img.shape[0] - 1 <= y1):
@@ -379,7 +379,7 @@ def detect_edge(img):#形を求める
 				distance.append(i)
 				
 			elif(tmp_point1 == [] or tmp_point2 == []):
-				print("Skip")
+				#print("Skip")
 				continue
 			
 			
@@ -462,8 +462,8 @@ def oval_judge(img):
 	
 	#差分は正規化
 	difference = abs((size - sin_y)*(size - sin_y))/short_axi/short_axi
-	#plt.scatter(distance, size, label="difference", color="red")
-	#plt.plot(sin_x, sin_y, label="difference", color="green")
+	plt.scatter(distance, size, label="difference", color="red")
+	plt.plot(sin_x, sin_y, label="difference", color="green")
 	#plt.show()
 	difference = sum(difference)/len(difference)#平均
 	print("Oval:"+str(difference))
@@ -559,7 +559,7 @@ def pullpush_judge(img):#文字列でpullかpushかを返します
 	
 	#最も明るいマスを判定
 	num = img_ave.index(max(img_ave))
-	cv.imshow("ligth", img_list[num])
+	#cv.imshow("ligth", img_list[num])
 	
 	#最も明るいマスの中心と重心を結んだ直線を計算
 	if(num <= 2):
@@ -595,8 +595,8 @@ def pullpush_judge(img):#文字列でpullかpushかを返します
 			#cv.drawMarker(tmp_img, (x, y), (30, 0, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
 
 			if(edge_img[y][x].tolist() == 255 or edge_img[y+1][x].tolist() == 255 or edge_img[y-1][x].tolist() == 255):
-				print(str(x)+" , "+str(y))
-				cv.drawMarker(tmp_img, (x, y), (0, 0, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
+				#print(str(x)+" , "+str(y))
+				#cv.drawMarker(tmp_img, (x, y), (0, 0, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
 				edge_point = np.array([x, y])
 				break
 			
@@ -625,8 +625,8 @@ def pullpush_judge(img):#文字列でpullかpushかを返します
 			#cv.drawMarker(tmp_img, (x, y), (30, 0, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
 
 			if(edge_img[y][x].tolist() == 255 or edge_img[y+1][x].tolist() == 255 or edge_img[y-1][x].tolist() == 255):
-				print(str(x)+" , "+str(y))
-				cv.drawMarker(tmp_img, (x, y), (0, 0, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
+				#print(str(x)+" , "+str(y))
+				#cv.drawMarker(tmp_img, (x, y), (0, 0, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
 				edge_point = np.array([x, y])
 				break
 			
@@ -655,8 +655,8 @@ def pullpush_judge(img):#文字列でpullかpushかを返します
 			#cv.drawMarker(tmp_img, (x, y), (30, 0, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
 
 			if(edge_img[y][x].tolist() == 255 or edge_img[y+1][x].tolist() == 255 or edge_img[y-1][x].tolist() == 255):
-				print(str(x)+" , "+str(y))
-				cv.drawMarker(tmp_img, (x, y), (0, 0, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
+				#print(str(x)+" , "+str(y))
+				#cv.drawMarker(tmp_img, (x, y), (0, 0, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
 				edge_point = np.array([x, y])
 				break
 			
@@ -685,7 +685,7 @@ def pullpush_judge(img):#文字列でpullかpushかを返します
 			#cv.drawMarker(tmp_img, (x, y), (30, 0, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
 
 			if(edge_img[y][x].tolist() == 255 or edge_img[y+1][x].tolist() == 255 or edge_img[y-1][x].tolist() == 255):
-				print(str(x)+" , "+str(y))
+				#print(str(x)+" , "+str(y))
 				#cv.drawMarker(tmp_img, (x, y), (0, 0, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
 				edge_point = np.array([x, y])
 				break
@@ -716,7 +716,7 @@ def pullpush_judge(img):#文字列でpullかpushかを返します
 			if(x < 0 or y < 1 or edge_img.shape[1] < x or edge_img.shape[0] < y):
 				continue
 		
-			cv.drawMarker(tmp_img, (x, y), (30, 0, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
+			#cv.drawMarker(tmp_img, (x, y), (30, 0, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
 			
 			if(edge_img[y][x].tolist() == 255 or edge_img[y+1][x].tolist() == 255 or edge_img[y-1][x].tolist() == 255):
 				print(str(x)+" , "+str(y))
@@ -742,9 +742,9 @@ def pullpush_judge(img):#文字列でpullかpushかを返します
 	num = np.polyfit(result_list_x, result_list, 2)[0]
 	plt.scatter(result_list_x, result_list, label="light", color="red")
 	plt.plot(result_list_x, np.poly1d(np.polyfit(result_list_x, result_list, 2))(result_list_x), label="近似", color="red")
-	cv.imshow("tmp_img",tmp_img)
-	cv.imshow("img",img)
-	plt.show()
+	#cv.imshow("tmp_img",tmp_img)
+	#cv.imshow("img",img)
+	#plt.show()
 	
 	if(num < 0):#上に凸なら
 		return "push"
@@ -773,8 +773,8 @@ def judge(img):
 		pull = False
 		push = False
 		
-	#oval = oval_judge(img)
-	#sharp = sharp_judge(img)
+	oval = oval_judge(img)
+	sharp = sharp_judge(img)
 	
 	return sharp, oval, pull, push
 
