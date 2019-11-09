@@ -33,18 +33,18 @@ def find_gravity_r(img):#HSVカラーモデルから重心を探す
 		rects.append(np.array(rect))
 		
 	#for rect in rects:
-	#	cv.rectangle(img, tuple(rect[0:2]), tuple(rect[0:2] + rect[2:4]), (0, 0, 255), thickness=2)
-	#	cv.imshow('red', img)
+		#cv.rectangle(img, tuple(rect[0:2]), tuple(rect[0:2] + rect[2:4]), (0, 0, 255), thickness=2)
+		#cv.imshow('red', img)
 		
 	#最大の四角を見つける
 	result_rect = max(rects, key=(lambda x: x[2] * x[3]))
 			
-	#cv.rectangle(img, tuple(result_rect[0:2]), tuple(result_rect[0:2] + result_rect[2:4]), (0, 255, 0), thickness=2)
-	#print(result_rect)
+	cv.rectangle(img, tuple(result_rect[0:2]), tuple(result_rect[0:2] + result_rect[2:4]), (0, 255, 0), thickness=2)
+	print(result_rect)
 	re_img = img[ result_rect[1] : result_rect[1] + result_rect[3], result_rect[0] : result_rect[0] + result_rect[2]]
 	x = result_rect[0] + int(round(result_rect[2]/2))
 	y = result_rect[1] + int(round(result_rect[3]/2))
-	#cv.imshow('re_red', re_img)
+	cv.imshow('re_red', re_img)
 	g_point = np.array([x, y])
 	
 	return g_point
