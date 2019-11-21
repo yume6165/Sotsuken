@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <script src=".\three.js-master\build\three.min.js"></script>
+  <script src=".\three.js-master\examples\js\controls\OrbitControls.js"></script>
+  <script>
+    // ページの読み込みを待つ
+    window.addEventListener('load', init);
+
+    function init() {
+
+      // サイズを指定
+      const width = 800;
+      const height = 600;
+	  
+
+	  //マウスのグローバル変数
+
+      // レンダラーを作成
+      const renderer = new THREE.WebGLRenderer({
+        canvas: document.querySelector('#myCanvas')
+      });
+      renderer.setPixelRatio(window.devicePixelRatio);
+      renderer.setSize(width, height);
+	  
+	  const canvas = document.querySelector('#myCanvas');
+	  //マウスの座標管理用のベクトルを作成
+	  const mouse = new THREE.Vector2();
+	  
+	  //マウスイベントの登録
+	  canvas.addEventListener('mousemove', handleMouseMove);
+	  
+	  //マウスを動かしたときのイベント
+	  function handleMouseMove(){
+		const element = event.currentTarget;
+		//canvas要素上のXY座標
+		const x = event.clientX - element.offsetLeft;
+		const y = event.clientY - element.offsetTop;
+		//canvas要素上の幅高さ
+		const w = element.offsetWidth;
+		const h = element.offsetHeight;
+		
+		//-1~+1の範囲で現在のマウス座標を登録する
+		mouse.x = (x / w) * 2 - 1;
+		mouse.y = -(y / h) * 2 + 1;
+		
+	  }
+	  
+	  //レイキャストを作成
+	  const raycaster = new THREE.Raycaster();
+
+      // シーンを作成
+      const scene = new THREE.Scene();
+
+      // カメラを作成
+      var camera = new THREE.PerspectiveCamera(45, width / height);
+      camera.position.set(0, 200, +1000);
+	  //コントローラーにカメラ以外にも読み込んだらうまくいった
+	  var controls = new THREE.OrbitControls(camera, renderer.domElement);
+      //var controls = new THREE.OrbitControls(camera);
+      //controls.enableDamping = true;
+      //controls.dampingFactor = 0.2;
+	  
+	  //ライトを作成
+	  var a_light = new THREE.AmbientLight(0xffffff, 0.5);
+	  scene.add(a_light);
+	  const d_light = new THREE.DirectionalLight(0xFFFFFF, 1.0);
+	  d_light.position.z = 1000
+	  d_light.position.y = 1000
+	  scene.add(d_light);
+	  
+
+      // 重心を作成
+      const geometry = new THREE.SphereGeometry(10, 32, 32);
+      const material = new THREE.MeshBasicMaterial({color:0xFFFFFF});
+      const gravity = new THREE.Mesh(geometry, material);
+      scene.add(gravity);
+      
+      //軸の作成
+      const geometry_x = new THREE.CylinderGeometry( 5, 5, 1000, 32 );
+      const material_x = new THREE.MeshBasicMaterial( {color: 0xFF0000} );
+      const x = new THREE.Mesh( geometry_x, material_x );
+      //x.rotation.z = -90
+      //scene.add( x );
+      
+      //x軸
+      const geometry_x_cone = new THREE.ConeGeometry( 10, 20, 32 );
+      const material_x_cone = new THREE.MeshBasicMaterial( {color: 0xFF0000} );
+      const cone_x = new THREE.Mesh( geometry_x_cone, material_x_cone );
+      cone_x.position.y = 500
+      //cone_x.rotation.z = -90
+      //scene.add( cone_x );
+      var x_axis = new THREE.Group();
+      x_axis.add(x);
+      x_axis.add(cone_x);
+      x_axis.rotation.z = -Math.PI/2
+      //scene.add(x_axis)
+      
+      //y軸
+      const geometry_y = new THREE.CylinderGeometry( 5, 5, 1000, 32 );
+      const material_y = new THREE.MeshBasicMaterial( {color: 0x00FF00} );
+      const y = new THREE.Mesh( geometry_y, material_y );
+      //scene.add( y );
+      const geometry_y_cone = new THREE.ConeGeometry( 10, 20, 32 );
+      const material_y_cone = new THREE.MeshBasicMaterial( {color: 0x00FF00} );
+      const cone_y = new THREE.Mesh( geometry_y_cone, material_y_cone );
+      cone_y.position.y = 500
+      //cone_x.rotation.z = -90
+      //scene.add( cone_x );
+      var y_axis = new THREE.Group();
+      y_axis.add(y);
+      y_axis.add(cone_y);
+      //scene.add(y_axis)
+      
+      //ｚ軸
+      const geometry_z = new THREE.CylinderGeometry( 5, 5, 1000, 32 );
+      const material_z = new THREE.MeshBasicMaterial( {color: 0x0000FF} );
+      const z = new THREE.Mesh( geometry_z, material_z );
+      //z.rotation.x = 90
+      //scene.add( z );
+      const geometry_z_cone = new THREE.ConeGeometry( 10, 20, 32 );
+      const material_z_cone = new THREE.MeshBasicMaterial( {color: 0x0000FF} );
+      const cone_z = new THREE.Mesh( geometry_z_cone, material_z_cone );
+      cone_z.position.y = 500
+      //cone_x.rotation.z = -90
+      //scene.add( cone_x );
+      
+      //軸をまとめる
+      var z_axis = new THREE.Group();
+      z_axis.add(z);
+      z_axis.add(cone_z);
+      z_axis.rotation.x = Math.PI/2
+     // scene.add(z_axis)
+      
+      var axis = new THREE.Group();
+      axis.add(x_axis)
+      axis.add(y_axis)
+      axis.add(z_axis)
+      scene.add(axis)
+	  
+	  
+	//インプットの表示
+      const geometry_obj_input = new THREE.BoxGeometry(30, 40, 3);
+	  const material_obj_input = new THREE.MeshLambertMaterial({color: 0x6699FF});
+	  const obj_input = new THREE.Mesh( geometry_obj_input, material_obj_input );
+      obj_input.position.x = 30
+	  obj_input.position.y = 30
+	  scene.add(obj_input)
+
+      tick();
+
+      // 毎フレーム時に実行されるループイベントです
+      function tick() {
+        controls.update();
+		
+		//レイキャスト　＝　マウス位置からまっすぐに伸びる光線ベクトルを生成
+		raycaster.setFromCamera(mouse, camera);
+		
+		//その光線とぶつかったオブジェクトを得る
+		const intersects = raycaster.intersectObjects(scene.children);
+		
+		if(intersects.length > 0){
+			//ぶつかったオブジェクトに対して何かする
+			intersects[0].color = 0x669900;
+		}
+		
+        renderer.render(scene, camera); // レンダリング
+        requestAnimationFrame(tick);
+      }
+    }
+  </script>
+</head>
+<body>
+  <canvas id="myCanvas"></canvas>
+</body>
+</html>

@@ -8,6 +8,7 @@ import numpy as np
 import math
 import matplotlib.pyplot as plt
 import glob
+from statistics import mean, stdev
 
 #研究室で研究するとき
 #path = "./sample/incision_1.jpg"
@@ -251,6 +252,9 @@ def detect_edge(img):#形を求める
 	distance = []
 	sin_x = []
 	sin_y = []
+	
+	edge_side1 = []
+	edge_side2 = []
 	#print(max_point1)
 	#print(max_point2)
 	
@@ -261,6 +265,7 @@ def detect_edge(img):#形を求める
 			c = y + 1 / k * x
 			tmp_point1 = []
 			tmp_point2 = []
+			center = np.array([x, y])
 			
 			for j in range(int(round(long_axi))):
 				x1 = x
@@ -278,9 +283,11 @@ def detect_edge(img):#形を求める
 				else:
 					if(tmp_img[y1][x1].tolist() == 255 or tmp_img[y1 + 1][x1].tolist() == 255 or tmp_img[y1 - 1][x1].tolist() == 255):#エッジ（白）ならば,幅は３
 						tmp_point1 = np.array([x1, y1])#ベクトルを保存
+						edge_side1.append(round(np.linalg.norm(tmp_point1 - center),4))
 						break
 					if(tmp_img[y1][x1].tolist() == 255 or tmp_img[y1][x1 + 1].tolist() == 255 or tmp_img[y1][x1 -1].tolist() == 255):#エッジ（白）ならば,幅は３
 						tmp_point1 = np.array([x1, y1])#ベクトルを保存
+						edge_side1.append(round(np.linalg.norm(tmp_point1 - center),4))
 						break
 				
 			for j in range(int(round(long_axi))):
@@ -296,10 +303,13 @@ def detect_edge(img):#形を求める
 				else:
 					if(tmp_img[y1][x1].tolist() == 255 or tmp_img[y1 + 1][x1].tolist() == 255 or tmp_img[y1 - 1][x1].tolist() == 255):#エッジ（白）ならば,幅は３
 						tmp_point2 = np.array([x1, y1])#ベクトルを保存
+						edge_side2.append(round(np.linalg.norm(tmp_point2 - center),4))
 						break
 					if(tmp_img[y1][x1].tolist() == 255 or tmp_img[y1][x1 + 1].tolist() == 255 or tmp_img[y1][x1 -1].tolist() == 255):#エッジ（白）ならば,幅は３
-						tmp_point1 = np.array([x1, y1])#ベクトルを保存
+						tmp_point2 = np.array([x1, y1])#ベクトルを保存
+						edge_side2.append(round(np.linalg.norm(tmp_point2 - center),4))
 						break
+					
 					
 			if(tmp_point1 != [] and tmp_point2 != []):
 				#print(round(np.linalg.norm(tmp_point1 - tmp_point2)))
@@ -325,6 +335,7 @@ def detect_edge(img):#形を求める
 			c = y + 1 / k * x
 			tmp_point1 = []
 			tmp_point2 = []
+			center = np.array([x, y])
 			
 			for j in range(int(round(long_axi))):
 				x1 = int(x + j)
@@ -342,10 +353,13 @@ def detect_edge(img):#形を求める
 				else:
 					if(tmp_img[y1][x1].tolist() == 255 or tmp_img[y1 + 1][x1].tolist() == 255 or tmp_img[y1 - 1][x1].tolist() == 255):#エッジ（白）ならば,幅は３
 						tmp_point1 = np.array([x1, y1])#ベクトルを保存
+						edge_side1.append(round(np.linalg.norm(tmp_point1 - center),4))
 						break
 					if(tmp_img[y1][x1].tolist() == 255 or tmp_img[y1][x1 + 1].tolist() == 255 or tmp_img[y1][x1 -1].tolist() == 255):#エッジ（白）ならば,幅は３
 						tmp_point1 = np.array([x1, y1])#ベクトルを保存
+						edge_side1.append(round(np.linalg.norm(tmp_point1 - center),4))
 						break
+					
 				
 			for j in range(int(round(long_axi))):
 				x1 = int(x - j)
@@ -360,10 +374,13 @@ def detect_edge(img):#形を求める
 				else:
 					if(tmp_img[y1][x1].tolist() == 255 or tmp_img[y1 + 1][x1].tolist() == 255 or tmp_img[y1 - 1][x1].tolist() == 255):#エッジ（白）ならば,幅は３
 						tmp_point2 = np.array([x1, y1])#ベクトルを保存
+						edge_side2.append(round(np.linalg.norm(tmp_point2 - center),4))
 						break
 					if(tmp_img[y1][x1].tolist() == 255 or tmp_img[y1][x1 + 1].tolist() == 255 or tmp_img[y1][x1 -1].tolist() == 255):#エッジ（白）ならば,幅は３
-						tmp_point1 = np.array([x1, y1])#ベクトルを保存
+						tmp_point2 = np.array([x1, y1])#ベクトルを保存
+						edge_side2.append(round(np.linalg.norm(tmp_point2 - center),4))
 						break
+					
 					
 			if(tmp_point1 != [] and tmp_point2 != []):
 				#print(round(np.linalg.norm(tmp_point1 - tmp_point2)))
@@ -388,7 +405,8 @@ def detect_edge(img):#形を求める
 			c = y + 1 / k * x
 			tmp_point1 = []
 			tmp_point2 = []
-			cv.drawMarker(img, (x, y), (255, 255, 255), markerType=cv.MARKER_TILTED_CROSS, markerSize=5)
+			center = np.array([x, y])
+			#cv.drawMarker(img, (x, y), (255, 255, 255), markerType=cv.MARKER_TILTED_CROSS, markerSize=5)
 			
 			for j in range(int(round(short_axi * 1.5))):
 				x1 = int(x + j)
@@ -403,9 +421,11 @@ def detect_edge(img):#形を求める
 				else:
 					if(tmp_img[y1][x1].tolist() == 255 or tmp_img[y1 + 1][x1].tolist() == 255 or tmp_img[y1 - 1][x1].tolist() == 255):#エッジ（白）ならば,幅は３
 						tmp_point1 = np.array([x1, y1])#ベクトルを保存
+						edge_side1.append(round(np.linalg.norm(tmp_point1 - center),4))
 						break
 					if(tmp_img[y1][x1].tolist() == 255 or tmp_img[y1][x1 + 1].tolist() == 255 or tmp_img[y1][x1 -1].tolist() == 255):#エッジ（白）ならば,幅は３
 						tmp_point1 = np.array([x1, y1])#ベクトルを保存
+						edge_side1.append(round(np.linalg.norm(tmp_point1 - center),4))
 						break
 				
 			for j in range(int(round(short_axi * 1.5))):
@@ -421,10 +441,13 @@ def detect_edge(img):#形を求める
 				else:
 					if(tmp_img[y1][x1].tolist() == 255 or tmp_img[y1 + 1][x1].tolist() == 255 or tmp_img[y1 - 1][x1].tolist() == 255):#エッジ（白）ならば,幅は３
 						tmp_point2 = np.array([x1, y1])#ベクトルを保存
+						edge_side2.append(round(np.linalg.norm(tmp_point2 - center),4))
 						break
 					if(tmp_img[y1][x1].tolist() == 255 or tmp_img[y1][x1 + 1].tolist() == 255 or tmp_img[y1][x1 -1].tolist() == 255):#エッジ（白）ならば,幅は３
-						tmp_point1 = np.array([x1, y1])#ベクトルを保存
+						tmp_point2 = np.array([x1, y1])#ベクトルを保存
+						edge_side2.append(round(np.linalg.norm(tmp_point2 - center),4))
 						break
+					
 				
 				
 			#print(str(tmp_point1) + " , "+ str(tmp_point2))
@@ -443,16 +466,16 @@ def detect_edge(img):#形を求める
 				print("Skip")
 				continue
 			
-				
+	
 	#print(size)
 	#cv.drawMarker(img_edge, (g_point[0], g_point[1]), (0, 255, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
 	#cv.imshow("edge",img_edge)
 	#cv.imshow("img",tmp_img)
-	return size, distance, short_axi
+	return size, distance, short_axi, edge_side1, edge_side2
 	
 
 def oval_judge(img):
-	size, distance, short_axi = detect_edge(img)
+	size, distance, short_axi, e1, e2 = detect_edge(img)
 	
 	#傷が円に近いほどsinとの誤差が小さくなる
 	sin_x = np.arange(0,distance.index(max(distance))+1, 1)
@@ -470,10 +493,44 @@ def oval_judge(img):
 		return 1
 	else:
 		return 0
+
+def edge_judge(img):#創縁不整と創縁直線を判定
+		size, distance, short_axi, edge_side1, edge_side2 = detect_edge(img)
+		edge_irregular = 0
+		edge_straight = 0
 		
+		#三分割にする
+		sp_size1 = list(np.array_split(edge_side1, 3))
+		md_size1 = sp_size1[1]
+		
+		sp_size2 = list(np.array_split(edge_side2, 3))
+		md_size2 = sp_size2[1]
+		
+		
+		#標準偏差、平均、偏導関数を計算
+		ev1 = stdev(md_size1)
+		ave1 = mean(md_size1)
+		cv1 = ev1 / ave1#相対的なバラつきを計算
+		
+		ev2 = stdev(md_size2)
+		ave2 = mean(md_size2)
+		cv2 = ev2 / ave2#相対的なバラつきを計算
+		
+		#創縁不整,直線を定義
+		if(cv1 < 0.1 and cv2 < 0.1):
+			edge_straight = 1
+		elif(cv1 >= 0.1 and cv2 >= -0.1):
+			edge_irregular = 1
+		else:
+			edge_straight = 1
+			edge_irregular = 1
+		#print("cv : "+ str(cv))
+		
+		
+		return edge_irregular, edge_straight
 
 def sharp_judge(img):
-	size, distance, short_axi = detect_edge(img)
+	size, distance, short_axi, e1, e2 = detect_edge(img)
 	cos_x = np.arange(0,distance.index(max(distance))+1, 1)
 	cos_y = np.cos(cos_x/(distance.index(max(distance)))*math.pi)*short_axi
 	
@@ -482,6 +539,7 @@ def sharp_judge(img):
 	sp_distance = list(np.array_split(distance, 3))
 	sp_cos_x = list(np.array_split(cos_x, 3))
 	sp_cos_y = list(np.array_split(cos_y, 3))
+	
 	
 	#差分を計算(fw:前)
 	fw_size = np.diff(sp_size[0], n=1)
@@ -511,11 +569,14 @@ def sharp_judge(img):
 	#cv.imshow("img",img)
 	#plt.show()
 	
-	if((fw_result + bw_result) / 2 < 0.5):#0.5未満ならシャープ
-		return 1
+	if(fw_result < 0.5 and bw_result < 0.5):#どちらの端も0.5未満なら創端鋭利
+		return 1, 0
 		
-	else:
-		return 0
+	elif(fw_result >= 0.5 and bw_result >= 0.5):#どちらの端も0.5未満なら創端太
+		return 0, 1
+		
+	else:#どちらかの端点が太く、もう一方が鋭利
+		return 0, 0
 		
 
 def contrast(image, a):#(aはゲイン)
@@ -526,6 +587,7 @@ def contrast(image, a):#(aはゲイン)
 	return result_image
 
 
+#pullpush判定は使わないかも
 def pullpush_judge(img):#文字列でpullかpushかを返します
 	global light_point, kaizoudo
 	gravity = find_gravity_r(img)#重心
@@ -752,30 +814,27 @@ def pullpush_judge(img):#文字列でpullかpushかを返します
 	
 	
 def judge(img):
-	sharp = 0
+	end_sharp = 0
+	end_thick = 0
+	edge_irregular = 0
+	edge_straight = 0
 	oval = 0
-	pull = 0
-	push = 0
 	
 	detect_figure(img)
 	detect_edge(img)
 	
-	s = pullpush_judge(img)	
-	if(s == "pull"):
-		pull = 1
-		push = 0
-	elif(s == "push"):
-		pull = 0
-		push = 1
-	else:
-		pull = 0
-		push = 0
-		
-	oval = oval_judge(img)
-	sharp = sharp_judge(img)
-	#print("鋭さ："+str(sharp)+"　円度："+ str(oval)+"　引き："+ str(pull)+"　押し："+ str(push))
+	#創傷端を判定
+	end_sharp, end_thick = sharp_judge(img)
 	
-	return sharp, oval, pull, push
+	#創傷縁を判定
+	edge_irregular, edge_straight = edge_judge(img)
+	
+	#円度を判定
+	oval = oval_judge(img)
+	
+	print("創端鋭利："+str(end_sharp)+"　創端太："+str(end_thick)+" 創縁不整："+str(edge_irregular)+" 創端直線："+str(edge_straight)+"　円度："+ str(oval))
+	
+	return end_sharp, end_thick, oval
 	
 	
 def read_img(folder):#フォルダを指定して

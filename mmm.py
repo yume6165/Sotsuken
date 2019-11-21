@@ -110,7 +110,7 @@ def sem_projection(sem_mat, sem_contex, data, input_img, contex_vec_list):#data�
 	for d in data_vec.tolist():
 		count = 0
 		tmp = np.array(d) - np.array(input_vec.reshape(-1,))
-		tmp = tmp.reshape(-1,)
+		tmp = tmp.reshape(-1,)#なんか二次元配列になっちゃう問題
 		dis = 0
 		
 		for w in weigth_c:
@@ -137,12 +137,12 @@ def sem_projection(sem_mat, sem_contex, data, input_img, contex_vec_list):#data�
 if __name__ == '__main__':
 	data = [[1, 0, 1, 0], [1, 1, 0, 1], [1, 0, 0, 0]]#模範データ(今の段階ではデータベースの既存データとしても利用中)
 	word_list = ["sharp", "oval", "pull", "push"]
-	contex_word = ["sharp", "oval"]
+	contex_word = ["sharp", "oval", "pull"]
 	
 	sem_mat = make_semantic_matrix(data)
 	sem_contex, contex_vec_list = make_context(sem_mat, word_list, contex_word, data)
 	
-	input_img = [0 ,0 ,0 ,1]#テスト用の入力画像
+	input_img = [1 ,0 ,0 ,1]#テスト用の入力画像
 	data_dis = sem_projection(sem_mat, sem_contex, data, input_img, contex_vec_list)
 	print(data_dis)
 	
