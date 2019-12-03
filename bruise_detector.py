@@ -24,10 +24,10 @@ plt.rcParams["axes.facecolor"] = "white"
 import plotly.graph_objects as go
 
 
-#path = "D:\Sotsuken\Sotsuken_repo\sample\\incision_1.jpg"
+path = "D:\Sotsuken\Sotsuken_repo\sample\\bruise"
 
 #研究室のときはこちらを利用
-path = ".\sample\\incision_1.jpg"
+#path = ".\sample\\incision_1.jpg"
 
 
 #重心を見つける関数の使いまわし、傷周辺の長方形だけを繰りぬくように改変
@@ -51,6 +51,8 @@ def find_wound(img):#HSVカラーモデルから重心を探す
 	#	cv.rectangle(img, tuple(rect[0:2]), tuple(rect[0:2] + rect[2:4]), (0, 0, 255), thickness=2)
 	#	cv.imshow('red', img)
 
+	if(rects == []):
+		return img
 	#最大の四角を見つける
 	result_rect = max(rects, key=(lambda x: x[2] * x[3]))
 
@@ -75,13 +77,10 @@ def toLab(img):
 	img_a = np.ndarray.flatten(img_a)
 	img_b = np.ndarray.flatten(img_b)
 	#print(img_a)
-	hist, aedges, bedges= np.histogram2d(img_a, img_b, bins=100, range=[[0,255],[0,255]])
+	hist, aedges, bedges= np.histogram2d(img_a, img_b, bins=50, range=[[0,255],[0,255]])
 
 	#img = cv.imread(hist)
 	#cv.imshow()
-
-
-
 
 	#histに64*64のマスに値が入ってます
 	plt.figure()
@@ -89,67 +88,66 @@ def toLab(img):
 	plt.title("Histgram 2D")
 	plt.xlabel("a*")
 	plt.ylabel("b*")
-	plt.savefig('D:\Sotsuken\output\heat_map.png')
-
+	plt.savefig('D:\Sotsuken\Sotsuken_repo\output\heat_map.png')
+	
+	
 
 	#x,y座標を３Dの形式に変換
-	apos, bpos = np.meshgrid(aedges[:-1], bedges[:-1])
-	zpos = 0#zは０を始点にする
+	#apos, bpos = np.meshgrid(aedges[:-1], bedges[:-1])
+	#zpos = 0#zは０を始点にする
 
 	#x,y座標の幅を指定
-	da = apos[0][1] - apos[0][0]
-	db = bpos[1][0] - bpos[0][0]
-	dz = hist.ravel()
+	#da = apos[0][1] - apos[0][0]
+	#db = bpos[1][0] - bpos[0][0]
+	#dz = hist.ravel()
 
 	#x,yを３Dの形に変換
-	apos = apos.ravel()
-	bpos = bpos.ravel()
+	#apos = apos.ravel()
+	#bpos = bpos.ravel()
 
 	#３D描画
-	fig = plt.figure()#描画領域の作成
-	aa = fig.add_subplot(111, projection="3d")
-	aa.bar3d(apos, bpos, zpos, da, db, dz, cmap=cm.hsv)#ヒストグラムを３D空間に表示
-	plt.title("Histgram 2D")
-	plt.xlabel("a*")
-	plt.ylabel("b*")
-	aa.set_zlabel("Z")
+	#fig = plt.figure()#描画領域の作成
+	#aa = fig.add_subplot(111, projection="3d")
+	#aa.bar3d(apos, bpos, zpos, da, db, dz, cmap=cm.hsv)#ヒストグラムを３D空間に表示
+	#plt.title("Histgram 2D")
+	#plt.xlabel("a*")
+	#plt.ylabel("b*")
+	#aa.set_zlabel("Z")
 	#plt.show()
 
-	#ヒートマップをグラフカットで取り出して合成する
-	src1 = cv.imread('D:\Sotsuken\output\heat_map.png')
-	src2 = cv.imread('D:\Sotsuken\output\Lab2.jpg')
-	cv.imshow('src1', src1)
-	cv.rectangle(src1, (70, 50), (490, 440), (255, 0, 255), thickness=8, lineType=cv.LINE_4)
-	# 前景マスクデータ格納準備
-	mask = np.zeros(src1.shape[:2],np.uint8)
+	src1 = cv.imread('D:\Sotsuken\Sotsuken_repo\output\heat_map.png')
+	src2 = cv.imread('D:\Sotsuken\Sotsuken_repo\output\Lab2.jpg')
+	#cv.imshow('src', src1)
+	#cv.rectangle(src1, (70, 50), (490, 440), (255, 0, 255), thickness=8, lineType=cv.LINE_4)
 
-	# 前景領域データ、背景領域データ格納準備
-	bg_model = np.zeros((1,65),np.float64)
-	fg_model = np.zeros((1,65),np.float64)
-	rect = (70,50, 420, 420)
-	#矩形グラフカットデータ化
-	cv.grabCut(src1, mask, rect, bg_model, fg_model, 5, cv.GC_INIT_WITH_RECT)
-
-	#領域分割
-	# 0：矩形外（背景確定）→　0
-	# 1：矩形内（グラフカットによる背景かもしれない領域）→ 0
-	# 2：矩形内（前景確定）→ 1
-	# 3：矩形内（グラフカット判定による前景かもしれない領域）→ 1
-	mask2 = np.where((mask == 2) | (mask == 0), 0, 1).astype('uint8')
-
-	# グラフカット処理
-	src1 = src1 * mask2[:, :, np.newaxis]
-	#cv.imshow('src1',src1)
+	rect = (80,58, 397, 368)
+	src1 = src1[ rect[1] : rect[1] + rect[3], rect[0] : rect[0] + rect[2]]
+	#色の表示系がずれているので回転
+	src1 = cv.rotate(src1, cv.ROTATE_90_COUNTERCLOCKWISE)
 
 	src1 = cv.resize(src1, src2.shape[1::-1])
 	dst = cv.addWeighted(src1, 0.5, src2, 0.5, 0)
 
 	#cv.imshow('result.jpg', dst)
-
+	#cv.waitKey()
+	return dst
+	
+def read_img(folder):#フォルダを指定して
+	files = glob.glob(os.path.join(path, '*.jpg'))
+	result_list = []
+	name_list = ["bruise_1", "bruise_2", "bruise_3", "health_1","health_2"]
+	count = 0
+	for file in files:
+		print(file)
+		img = cv.imread(file)
+		result = toLab(img)
+		result_list.append(result)
+		count += 1
+	
+	for i in range(len(result_list)):
+		cv.imshow(name_list[i], result_list[i])
 	cv.waitKey()
 
 
-
 if __name__ == '__main__':
-	img = cv.imread(path, cv.IMREAD_COLOR)
-	toLab(img)
+	read_img(path)
