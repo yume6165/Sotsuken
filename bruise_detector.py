@@ -1,3 +1,6 @@
+#codeing:utf-8
+# -*- coding: utf-8 -*-
+
 import os, sys, time
 import cv2 as cv
 from PIL import Image
@@ -21,7 +24,11 @@ plt.rcParams["axes.facecolor"] = "white"
 import plotly.graph_objects as go
 
 
-path = "D:\Sotsuken\Sotsuken_repo\sample\\incision_1.jpg"
+#path = "D:\Sotsuken\Sotsuken_repo\sample\\incision_1.jpg"
+
+#研究室のときはこちらを利用
+path = ".\sample\\incision_1.jpg"
+
 
 #重心を見つける関数の使いまわし、傷周辺の長方形だけを繰りぬくように改変
 def find_wound(img):#HSVカラーモデルから重心を探す
@@ -30,23 +37,23 @@ def find_wound(img):#HSVカラーモデルから重心を探す
 	s = hsv[:, :, 1]
 	mask = np.zeros(h.shape, dtype=np.uint8)
 	mask[((h < 20) | (h > 200)) & (s > 128)] = 255
-	
+
 	#輪郭を作るうえで塊ごとに配列化する
 	contours, _ = cv.findContours(mask, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
-	
+
 	rects = []
 	for contour in contours:#contourには輪郭をなすピクセルの情報が入っている
 		approx = cv.convexHull(contour)#凸凹のある塊を内包する凸上の形状を算出して２Dポリゴンに
 		rect = cv.boundingRect(approx)#袋状になったポリゴンがすっぽり入る四角を計算する
 		rects.append(np.array(rect))
-		
+
 	#for rect in rects:
 	#	cv.rectangle(img, tuple(rect[0:2]), tuple(rect[0:2] + rect[2:4]), (0, 0, 255), thickness=2)
 	#	cv.imshow('red', img)
-		
+
 	#最大の四角を見つける
 	result_rect = max(rects, key=(lambda x: x[2] * x[3]))
-			
+
 	#cv.rectangle(img, tuple(result_rect[0:2]), tuple(result_rect[0:2] + result_rect[2:4]), (0, 255, 0), thickness=2)
 	#print(result_rect)
 	re_img = img[ result_rect[1] : result_rect[1] + result_rect[3], result_rect[0] : result_rect[0] + result_rect[2]]
@@ -54,7 +61,7 @@ def find_wound(img):#HSVカラーモデルから重心を探す
 	y = result_rect[1] + int(round(result_rect[3]/2))
 	#cv.imshow('re_red', re_img)
 	g_point = np.array([x, y])
-	
+
 	return re_img
 
 #画像を読み込んでLab空間に変換
@@ -63,19 +70,19 @@ def toLab(img):
 	img_Lab = cv.cvtColor(img_ori, cv.COLOR_BGR2Lab)
 	#print(img_Lab)
 	img_L, img_a, img_b = cv.split(img_Lab)
-	
+
 	#プロットしてみる
 	img_a = np.ndarray.flatten(img_a)
 	img_b = np.ndarray.flatten(img_b)
 	#print(img_a)
 	hist, aedges, bedges= np.histogram2d(img_a, img_b, bins=100, range=[[0,255],[0,255]])
-	
+
 	#img = cv.imread(hist)
 	#cv.imshow()
-	
-	
-	
-	
+
+
+
+
 	#histに64*64のマスに値が入ってます
 	plt.figure()
 	sns.heatmap(hist, cmap="binary_r")
@@ -83,21 +90,21 @@ def toLab(img):
 	plt.xlabel("a*")
 	plt.ylabel("b*")
 	plt.savefig('D:\Sotsuken\output\heat_map.png')
-	
-	
+
+
 	#x,y座標を３Dの形式に変換
 	apos, bpos = np.meshgrid(aedges[:-1], bedges[:-1])
 	zpos = 0#zは０を始点にする
-	
+
 	#x,y座標の幅を指定
 	da = apos[0][1] - apos[0][0]
 	db = bpos[1][0] - bpos[0][0]
 	dz = hist.ravel()
-	
+
 	#x,yを３Dの形に変換
 	apos = apos.ravel()
 	bpos = bpos.ravel()
-	
+
 	#３D描画
 	fig = plt.figure()#描画領域の作成
 	aa = fig.add_subplot(111, projection="3d")
@@ -107,7 +114,7 @@ def toLab(img):
 	plt.ylabel("b*")
 	aa.set_zlabel("Z")
 	#plt.show()
-	
+
 	#ヒートマップをグラフカットで取り出して合成する
 	src1 = cv.imread('D:\Sotsuken\output\heat_map.png')
 	src2 = cv.imread('D:\Sotsuken\output\Lab2.jpg')
@@ -133,12 +140,12 @@ def toLab(img):
 	# グラフカット処理
 	src1 = src1 * mask2[:, :, np.newaxis]
 	#cv.imshow('src1',src1)
-	
+
 	src1 = cv.resize(src1, src2.shape[1::-1])
 	dst = cv.addWeighted(src1, 0.5, src2, 0.5, 0)
 
 	#cv.imshow('result.jpg', dst)
-	
+
 	cv.waitKey()
 
 
