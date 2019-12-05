@@ -6,6 +6,8 @@ import cv2 as cv
 from PIL import Image
 from PIL import ImageDraw
 import numpy as np
+np.set_printoptions(threshold=np.inf)
+
 import math
 
 import seaborn as sns
@@ -16,7 +18,7 @@ import matplotlib.cm as cm
 
 
 import glob
-from statistics import mean, stdev
+from statistics import mean, stdev, mode
 
 plt.style.use('ggplot')
 plt.rcParams["axes.facecolor"] = "white"
@@ -31,7 +33,7 @@ path = "D:\Sotsuken\Sotsuken_repo\sample\\bruise"
 
 
 #重心を見つける関数の使いまわし、傷周辺の長方形だけを繰りぬくように改変
-def find_wound(img):#HSVカラーモデルから重心を探す
+def find_wound_COLOR(img):#HSVカラーモデルから重心を探す
 	hsv = cv.cvtColor(img, cv.COLOR_BGR2HSV_FULL)
 	h = hsv[:, :, 0]#色相(赤の範囲は256段階の200～20と定義するfromhttps://qiita.com/odaman68000/items/ae28cf7bdaf4fa13a65b)
 	s = hsv[:, :, 1]
@@ -70,110 +72,162 @@ def find_wound(img):#HSVカラーモデルから重心を探す
 def toLab(img):
 	cols = 120 #ヒストグラムの行と列の数
 	
-	img_ori = find_wound(img)#傷周辺のみを切り抜いた画像
+	img_ori = find_wound_COLOR(img)#傷周辺のみを切り抜いた画像
 	img_Lab = cv.cvtColor(img_ori, cv.COLOR_BGR2Lab)
 	#print(img_Lab)
 	img_L, img_a, img_b = cv.split(img_Lab)
-
+	
+	#明度の解析
+	img_L = np.ndarray.flatten(img_L)
+	#print(int(mean(img_L.tolist()) / 256 * 100))
+	brightness = int(mean(img_L.tolist()) / 256 * 100)
+	
 	#プロットしてみる
 	img_a = np.ndarray.flatten(img_a)
 	img_b = np.ndarray.flatten(img_b)
 	#print(img_a)
 	hist, aedges, bedges= np.histogram2d(img_a, img_b, bins=cols, range=[[0,255],[0,255]])
 	
-	hist_list = hist.tolist()
-	max_list = max(hist_list)
-	m = max(max_list)
-	
-	#ヒストグラムで一番多きいところの座標を習得 : hist[y][x]
-	x = hist_list.index(max(hist_list))
-	y = max_list.index(m)
 	#print(np.array(hist.tolist()).shape)
 	
+	
 	#一度一次元配列に変換してから二次元での位置を確認する
+	tmp_hist = np.ndarray.flatten(hist)
 	
-	
-	#原点が（cols/2,cols / 2）担っているのでこれを（0,0）にシフトし、赤を0度として角度で色情報を付与
-	x -= int(cols / 2)
-	y -= int(cols / 2)
-	r = math.sqrt(x**2 + y**2)
-	cos = x / r
-	sin = y / r
-	#print(math.degrees(math.acos(cos)))
-	#print(math.degrees(math.asin(sin)))
-	deg = math.degrees(math.acos(cos))
-	
-	if(math.degrees(math.asin(sin)) < 0):#yがマイナスなら下半分
-		deg = -1 * math.fabs(deg)
+	#tmp_histで大きな値を10こもってくる
+	max_list1 = []
+	for i in range(1,30):
+		num = sorted(tmp_hist)[-i]
+		if(num == 0):
+			continue
+			
+		indexes = [j for j, z in enumerate(tmp_hist) if z == num]
 		
+		for place in indexes:
+			x = int(place / cols)
+			y = place % cols
 		
+			max_list1.append(np.array([x, y]))
+		
+	
+	#print(max_list1)
+	
+	
+	#hist_list = hist.tolist()
+	#max_list = max(hist_list)
+	#m = max(max_list)
+	
+	#ヒストグラムで一番多きいところの座標を習得 : hist[y][x]
+	#x = hist_list.index(max(hist_list))
+	#y = max_list.index(m)
+	
+	degs = []
+	saturations = []
+	opt = ""
+	for val in max_list1:
+		x = val[0]
+		y = val[1]
+	
+		#原点が（cols/2,cols / 2）担っているのでこれを（0,0）にシフトし、赤を0度として角度で色情報を付与
+		x -= int(cols / 2)
+		y -= int(cols / 2)
+		r = math.sqrt(x**2 + y**2)
+		cos = x / r
+		sin = y / r
+		r = int(r)
+		#print(r)
+		#print(math.degrees(math.acos(cos)))
+		#print(math.degrees(math.asin(sin)))
+		deg = math.degrees(math.acos(cos))
+	
+		if(math.degrees(math.asin(sin)) < 0):#yがマイナスなら下半分
+			deg = -1 * math.fabs(deg)
+		
+		if(brightness >= 60):
+			opt = 'pale'
+			
+		elif(brightness <= 40):
+			opt = 'dark'
+		
+		elif(r <= 20):
+			opt = 'graylsh'
+		
+		elif(20 < r and r <= 40):
+			opt = 'dull'
+			
+		else:
+			opt = ''
+			
+		degs.append([deg, opt])
+	
 	#色の判定
-	color_list = []
-	if(0 <= deg and deg < 10):
-		color_list.append("10RP")
+	color_list = []	
+	for deg in degs:	
+		if(0 <= deg[0] and deg[0] < 10):
+			color_list.append(deg[1] + "10RP")
 	
-	elif(10 <= deg and deg < 29):
-		color_list.append("5R")
+		elif(10 <= deg[0] and deg[0] < 29):
+			color_list.append(deg[1] +"5R")
 	
-	elif(29 <= deg and deg < 47):
-		color_list.append("10R")
+		elif(29 <= deg[0] and deg[0] < 47):
+			color_list.append(deg[1] +"10R")
 		
-	elif(47 <= deg and deg < 65):
-		color_list.append("5YR")
+		elif(47 <= deg[0] and deg[0] < 65):
+			color_list.append(deg[1] +"5YR")
 		
-	elif(65 <= deg and deg < 83):
-		color_list.append("10YR")
+		elif(65 <= deg[0] and deg[0] < 83):
+			color_list.append(deg[1] +"10YR")
 		
-	elif(83 <= deg and deg < 101):
-		color_list.append("5Y")
+		elif(83 <= deg[0] and deg[0] < 101):
+			color_list.append(deg[1] +"5Y")
 		
-	elif(101 <= deg and deg < 119):
-		color_list.append("10Y")
+		elif(101 <= deg[0] and deg[0] < 119):
+			color_list.append(deg[1] +"10Y")
 		
-	elif(119 <= deg and deg < 137):
-		color_list.append("5GY")
+		elif(119 <= deg[0] and deg[0] < 137):
+			color_list.append(deg[1] +"5GY")
 		
-	elif(137 <= deg and deg < 155):
-		color_list.append("10GY")
+		elif(137 <= deg[0] and deg[0] < 155):
+			color_list.append(deg[1] +"10GY")
 		
-	elif(155 <= deg and deg < 173):
-		color_list.append("5G")
+		elif(155 <= deg[0] and deg[0] < 173):
+			color_list.append(deg[1] +"5G")
 	
-	elif(0 > deg and deg > -10):
-		color_list.append("10RP")
+		elif(0 > deg[0] and deg[0] > -10):
+			color_list.append(deg[1] +"10RP")
 	
-	elif(-10 >= deg and deg > -29):
-		color_list.append("5RP")
+		elif(-10 >= deg[0] and deg[0] > -29):
+			color_list.append(deg[1] +"5RP")
 	
-	elif(-29 >= deg and deg > -47):
-		color_list.append("10P")
+		elif(-29 >= deg[0] and deg[0] > -47):
+			color_list.append(deg[1] +"10P")
 		
-	elif(-47 >= deg and deg > -65):
-		color_list.append("5P")
+		elif(-47 >= deg[0] and deg[0] > -65):
+			color_list.append(deg[1] +"5P")
 		
-	elif(-65 >= deg and deg > -83):
-		color_list.append("10PB")
+		elif(-65 >= deg[0] and deg[0] > -83):
+			color_list.append(deg[1] +"10PB")
 		
-	elif(-83 >= deg and deg > -101):
-		color_list.append("5PB")
+		elif(-83 >= deg[0] and deg[0] > -101):
+			color_list.append(deg[1] +"5PB")
 		
-	elif(-101 >= deg and deg > -119):
-		color_list.append("10B")
+		elif(-101 >= deg[0] and deg[0] > -119):
+			color_list.append(deg[1] +"10B")
 		
-	elif(-119 >= deg and deg > -137):
-		color_list.append("5B")
+		elif(-119 >= deg[0] and deg[0] > -137):
+			color_list.append(deg[1] +"5B")
 		
-	elif(-137 >= deg and deg > -155):
-		color_list.append("10BG")
+		elif(-137 >= deg[0] and deg[0] > -155):
+			color_list.append(deg[1] +"10BG")
 		
-	elif(-155 >= deg and deg > -173):
-		color_list.append("5BG")
+		elif(-155 >= deg[0] and deg[0] > -173):
+			color_list.append(deg[1] +"5BG")
 	
-	else:
-		color_list.append("10G")
+		else:
+			color_list.append(deg[1] +"10G")
 		
 	
-	print(color_list)
+	print(list(set(color_list)))
 	
 	#img = cv.imread(hist)
 	#cv.imshow()
