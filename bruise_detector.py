@@ -68,6 +68,8 @@ def find_wound(img):#HSVカラーモデルから重心を探す
 
 #画像を読み込んでLab空間に変換
 def toLab(img):
+	cols = 120 #ヒストグラムの行と列の数
+	
 	img_ori = find_wound(img)#傷周辺のみを切り抜いた画像
 	img_Lab = cv.cvtColor(img_ori, cv.COLOR_BGR2Lab)
 	#print(img_Lab)
@@ -77,8 +79,102 @@ def toLab(img):
 	img_a = np.ndarray.flatten(img_a)
 	img_b = np.ndarray.flatten(img_b)
 	#print(img_a)
-	hist, aedges, bedges= np.histogram2d(img_a, img_b, bins=50, range=[[0,255],[0,255]])
-
+	hist, aedges, bedges= np.histogram2d(img_a, img_b, bins=cols, range=[[0,255],[0,255]])
+	
+	hist_list = hist.tolist()
+	max_list = max(hist_list)
+	m = max(max_list)
+	
+	#ヒストグラムで一番多きいところの座標を習得 : hist[y][x]
+	x = hist_list.index(max(hist_list))
+	y = max_list.index(m)
+	#print(np.array(hist.tolist()).shape)
+	
+	#一度一次元配列に変換してから二次元での位置を確認する
+	
+	
+	#原点が（cols/2,cols / 2）担っているのでこれを（0,0）にシフトし、赤を0度として角度で色情報を付与
+	x -= int(cols / 2)
+	y -= int(cols / 2)
+	r = math.sqrt(x**2 + y**2)
+	cos = x / r
+	sin = y / r
+	#print(math.degrees(math.acos(cos)))
+	#print(math.degrees(math.asin(sin)))
+	deg = math.degrees(math.acos(cos))
+	
+	if(math.degrees(math.asin(sin)) < 0):#yがマイナスなら下半分
+		deg = -1 * math.fabs(deg)
+		
+		
+	#色の判定
+	color_list = []
+	if(0 <= deg and deg < 10):
+		color_list.append("10RP")
+	
+	elif(10 <= deg and deg < 29):
+		color_list.append("5R")
+	
+	elif(29 <= deg and deg < 47):
+		color_list.append("10R")
+		
+	elif(47 <= deg and deg < 65):
+		color_list.append("5YR")
+		
+	elif(65 <= deg and deg < 83):
+		color_list.append("10YR")
+		
+	elif(83 <= deg and deg < 101):
+		color_list.append("5Y")
+		
+	elif(101 <= deg and deg < 119):
+		color_list.append("10Y")
+		
+	elif(119 <= deg and deg < 137):
+		color_list.append("5GY")
+		
+	elif(137 <= deg and deg < 155):
+		color_list.append("10GY")
+		
+	elif(155 <= deg and deg < 173):
+		color_list.append("5G")
+	
+	elif(0 > deg and deg > -10):
+		color_list.append("10RP")
+	
+	elif(-10 >= deg and deg > -29):
+		color_list.append("5RP")
+	
+	elif(-29 >= deg and deg > -47):
+		color_list.append("10P")
+		
+	elif(-47 >= deg and deg > -65):
+		color_list.append("5P")
+		
+	elif(-65 >= deg and deg > -83):
+		color_list.append("10PB")
+		
+	elif(-83 >= deg and deg > -101):
+		color_list.append("5PB")
+		
+	elif(-101 >= deg and deg > -119):
+		color_list.append("10B")
+		
+	elif(-119 >= deg and deg > -137):
+		color_list.append("5B")
+		
+	elif(-137 >= deg and deg > -155):
+		color_list.append("10BG")
+		
+	elif(-155 >= deg and deg > -173):
+		color_list.append("5BG")
+	
+	else:
+		color_list.append("10G")
+		
+	
+	print(color_list)
+	
 	#img = cv.imread(hist)
 	#cv.imshow()
 
@@ -135,7 +231,7 @@ def toLab(img):
 def read_img(folder):#フォルダを指定して
 	files = glob.glob(os.path.join(path, '*.jpg'))
 	result_list = []
-	name_list = ["bruise_1", "bruise_2", "bruise_3", "health_1","health_2"]
+	name_list = ["bruise_1", "bruise_2", "bruise_3", "health_1","health_2", "test", "test2","test3"]
 	count = 0
 	for file in files:
 		print(file)
@@ -144,9 +240,10 @@ def read_img(folder):#フォルダを指定して
 		result_list.append(result)
 		count += 1
 	
-	for i in range(len(result_list)):
-		cv.imshow(name_list[i], result_list[i])
-	cv.waitKey()
+	#画像を表示
+	#for i in range(len(result_list)):
+#		cv.imshow(name_list[i], result_list[i])
+#	cv.waitKey()
 
 
 if __name__ == '__main__':
