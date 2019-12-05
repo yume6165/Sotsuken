@@ -18,6 +18,7 @@ path = "D:\Sotsuken\Sotsuken_repo\sample\\*"
 
 N = 1000
 
+
 def edge_detection(img):
 	tmp_img = cv.cvtColor(img, cv.COLOR_BGR2GRAY)#グレースケールに変換
 	tmp_img = cv.GaussianBlur(tmp_img, (5, 5), 3)#ガウシアンフィルタ
@@ -811,8 +812,8 @@ def pullpush_judge(img):#文字列でpullかpushかを返します
 		
 	else:
 		return "pull"
-	
-	
+
+
 def judge(img):
 	end_sharp = 0
 	end_thick = 0
@@ -832,9 +833,17 @@ def judge(img):
 	#円度を判定
 	oval = oval_judge(img)
 	
+	#色の判定
+	#palette = color_judge(toLab(img))
+	
 	print("創端鋭利："+str(end_sharp)+"　創端太："+str(end_thick)+" 創縁不整："+str(edge_irregular)+" 創端直線："+str(edge_straight)+"　円度："+ str(oval))
 	
-	return end_sharp, end_thick, oval
+	result = [end_sharp, end_thick, edge_irregular, edge_straight, oval]
+	
+	#色情報と合成
+	#result.extend(palette)
+	
+	return result
 	
 	
 def read_img(folder):#フォルダを指定して
@@ -842,17 +851,17 @@ def read_img(folder):#フォルダを指定して
 	data_list = []
 	for file in files:
 		#print(file)
-		f_list = []
 		img = cv.imread(file, cv.IMREAD_COLOR)
 		#sharp, oval, pull, push = judge(img)
-		f_list.append(judge(img))
-		data_list.append(f_list)
+		
+		data_list.append(judge(img))
 	
 	return data_list
 	
 
 if __name__ == '__main__':
-	read_img(path)
+	data = read_img(path)
+	ptint(data)
 		#img = cv.imread(path)
 		#img_edge = cv.imread(path)
 		#judge(img)

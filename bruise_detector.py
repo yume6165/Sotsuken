@@ -26,7 +26,7 @@ plt.rcParams["axes.facecolor"] = "white"
 import plotly.graph_objects as go
 
 
-path = "D:\Sotsuken\Sotsuken_repo\sample\\bruise"
+path = "D:\Sotsuken\Sotsuken_repo\\bruise"
 
 #研究室のときはこちらを利用
 #path = ".\sample\\incision_1.jpg"
@@ -164,67 +164,67 @@ def toLab(img):
 	color_list = []	
 	for deg in degs:	
 		if(0 <= deg[0] and deg[0] < 10):
-			color_list.append(deg[1] + "10RP")
+			color_list.append(deg[1] + "_10RP")
 	
 		elif(10 <= deg[0] and deg[0] < 29):
-			color_list.append(deg[1] +"5R")
+			color_list.append(deg[1] +"_5R")
 	
 		elif(29 <= deg[0] and deg[0] < 47):
-			color_list.append(deg[1] +"10R")
+			color_list.append(deg[1] +"_10R")
 		
 		elif(47 <= deg[0] and deg[0] < 65):
-			color_list.append(deg[1] +"5YR")
+			color_list.append(deg[1] +"_5YR")
 		
 		elif(65 <= deg[0] and deg[0] < 83):
-			color_list.append(deg[1] +"10YR")
+			color_list.append(deg[1] +"_10YR")
 		
 		elif(83 <= deg[0] and deg[0] < 101):
-			color_list.append(deg[1] +"5Y")
+			color_list.append(deg[1] +"_5Y")
 		
 		elif(101 <= deg[0] and deg[0] < 119):
-			color_list.append(deg[1] +"10Y")
+			color_list.append(deg[1] +"_10Y")
 		
 		elif(119 <= deg[0] and deg[0] < 137):
-			color_list.append(deg[1] +"5GY")
+			color_list.append(deg[1] +"_5GY")
 		
 		elif(137 <= deg[0] and deg[0] < 155):
-			color_list.append(deg[1] +"10GY")
+			color_list.append(deg[1] +"_10GY")
 		
 		elif(155 <= deg[0] and deg[0] < 173):
-			color_list.append(deg[1] +"5G")
+			color_list.append(deg[1] +"_5G")
 	
 		elif(0 > deg[0] and deg[0] > -10):
-			color_list.append(deg[1] +"10RP")
+			color_list.append(deg[1] +"_10RP")
 	
 		elif(-10 >= deg[0] and deg[0] > -29):
-			color_list.append(deg[1] +"5RP")
+			color_list.append(deg[1] +"_5RP")
 	
 		elif(-29 >= deg[0] and deg[0] > -47):
-			color_list.append(deg[1] +"10P")
+			color_list.append(deg[1] +"_10P")
 		
 		elif(-47 >= deg[0] and deg[0] > -65):
-			color_list.append(deg[1] +"5P")
+			color_list.append(deg[1] +"_5P")
 		
 		elif(-65 >= deg[0] and deg[0] > -83):
-			color_list.append(deg[1] +"10PB")
+			color_list.append(deg[1] +"_10PB")
 		
 		elif(-83 >= deg[0] and deg[0] > -101):
-			color_list.append(deg[1] +"5PB")
+			color_list.append(deg[1] +"_5PB")
 		
 		elif(-101 >= deg[0] and deg[0] > -119):
-			color_list.append(deg[1] +"10B")
+			color_list.append(deg[1] +"_10B")
 		
 		elif(-119 >= deg[0] and deg[0] > -137):
-			color_list.append(deg[1] +"5B")
+			color_list.append(deg[1] +"_5B")
 		
 		elif(-137 >= deg[0] and deg[0] > -155):
-			color_list.append(deg[1] +"10BG")
+			color_list.append(deg[1] +"_10BG")
 		
 		elif(-155 >= deg[0] and deg[0] > -173):
-			color_list.append(deg[1] +"5BG")
+			color_list.append(deg[1] +"_5BG")
 	
 		else:
-			color_list.append(deg[1] +"10G")
+			color_list.append(deg[1] +"_10G")
 		
 	
 	print(list(set(color_list)))
@@ -280,7 +280,98 @@ def toLab(img):
 
 	#cv.imshow('result.jpg', dst)
 	#cv.waitKey()
-	return dst
+	return dst, list(set(color_list))
+	
+def color_judge(color_list):
+	palette = [0]*100
+
+	for color in color_list:
+		opt = color.split("_")
+	
+		num1 = 0
+		num2 = 0
+		#opt[0]がオプションopt[1]が色相
+		if(opt[0] == 'pale'):
+			num1 = 0
+	
+		elif(opt[0] == 'graylsh'):
+			num1 = 1
+		
+		elif(opt[0] == 'dull'):
+			num1 = 2
+		
+		elif(opt[0] == 'dark'):
+			num1 = 3
+	
+		else:
+			num1 = 4
+	
+		#ここから色相
+		if(opt[1] == '5Y'):
+			num2 = 0
+	
+		elif(opt[1] == '10YR'):
+			num2 = 1
+		
+		elif(opt[1] == '5YR'):
+			num2 = 2
+		
+		elif(opt[1] == '10R'):
+			num2 = 3
+	
+		elif(opt[1] == '5R'):
+			num2 = 4
+	
+		elif(opt[1] == '10RP'):
+			num2 = 5
+	
+		elif(opt[1] == '5RP'):
+			num2 = 6
+		
+		elif(opt[1] == '10P'):
+			num2 = 7
+
+		elif(opt[1] == '5P'):
+			num2 = 8
+		
+		elif(opt[1] == '10PB'):
+			num2 = 9
+		
+		elif(opt[1] == '5PB'):
+			num2 = 10
+		
+		elif(opt[1] == '10B'):
+			num2 = 11
+		
+		elif(opt[1] == '5B'):
+			num2 = 12
+		
+		elif(opt[1] == '10BG'):
+			num2 = 13
+		
+		elif(opt[1] == '5BG'):
+			num2 = 14
+		
+		elif(opt[1] == '10G'):
+			num2 = 15
+		
+		elif(opt[1] == '5G'):
+			num2 = 16
+	
+		elif(opt[1] == '10GY'):
+			num2 = 17
+		
+		elif(opt[1] == '5GY'):
+			num2 = 18
+		
+		else:#10Y
+			num2 = 19
+		
+		num3 = num2 * 5 + num1
+		palette[num3] = 1
+		
+	return palette
+
 	
 def read_img(folder):#フォルダを指定して
 	files = glob.glob(os.path.join(path, '*.jpg'))
@@ -290,8 +381,9 @@ def read_img(folder):#フォルダを指定して
 	for file in files:
 		print(file)
 		img = cv.imread(file)
-		result = toLab(img)
-		result_list.append(result)
+		result, color_list = toLab(img)
+		palette = color_judge(color_list)
+		result_list.append(palette)
 		count += 1
 	
 	#画像を表示
