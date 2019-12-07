@@ -340,7 +340,7 @@ def detect_edge(img):#形を求める
 						break
 					
 					
-			if(tmp_point1 != [] and tmp_point2 != []):
+			if(len(tmp_point1) != 0 and len(tmp_point2) != 0):
 				#print(round(np.linalg.norm(tmp_point1 - tmp_point2)))
 				#cv.drawMarker(img_edge, (x, y), (255, 255, 255), markerType=cv.MARKER_TILTED_CROSS, markerSize=5)
 				#cv.drawMarker(img_edge, (tmp_point1[0], tmp_point1[1]), (i*15, 255, 25), markerType=cv.MARKER_TILTED_CROSS, markerSize=5)
