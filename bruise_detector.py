@@ -382,8 +382,9 @@ def read_img(folder):#フォルダを指定して
 		print(file)
 		img = cv.imread(file)
 		result, color_list = toLab(img)
+		
+		#色の判定を行ってベクトルに直しているのでこれをお知りにextendする予定
 		palette = color_judge(color_list)
-		result_list.append(palette)
 		count += 1
 	
 	#画像を表示

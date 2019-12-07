@@ -861,7 +861,7 @@ def read_img(folder):#フォルダを指定して
 
 if __name__ == '__main__':
 	data = read_img(path)
-	ptint(data)
+	print(data)
 		#img = cv.imread(path)
 		#img_edge = cv.imread(path)
 		#judge(img)
