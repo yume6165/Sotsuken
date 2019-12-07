@@ -66,20 +66,23 @@ def find_gravity_r(img):#HSVカラーモデルから重心を探す
 			
 	#cv.rectangle(img, tuple(result_rect[0:2]), tuple(result_rect[0:2] + result_rect[2:4]), (0, 255, 0), thickness=2)
 	#print(result_rect)
-	re_img = img[ result_rect[1] : result_rect[1] + result_rect[3], result_rect[0] : result_rect[0] + result_rect[2]]
+	#re_img = img[ result_rect[1] : result_rect[1] + result_rect[3], result_rect[0] : result_rect[0] + result_rect[2]]
+
 	x = result_rect[0] + int(round(result_rect[2]/2))
 	y = result_rect[1] + int(round(result_rect[3]/2))
 	#cv.imshow('re_red', re_img)
 	g_point = np.array([x, y])
 	
-	return g_point
+	return g_point, result_rect
 
 def detect_figure(img):#重心を使って最短辺から最長辺を求める
 	
 	global binary_image#2値画像
 	
-	g_point = find_gravity_r(img)
+	flag = ""#切創のようなエッジの取りやすい傷でないときに利用
+	g_point, rect = find_gravity_r(img)
 	tmp_img = edge_detection(img)
+	
 	min = N
 	tmp_point = []
 	min_point = []
@@ -103,9 +106,34 @@ def detect_figure(img):#重心を使って最短辺から最長辺を求める
 					min = dir
 					min_point1 = tmp_point
 					
+	#エッジが見つからないとき（フラグ持たせて余計な処理させないようにしたほうがいいかも）
+	if(len(min_point1) == 0):
+		#re_img = img[ result_rect[1] : result_rect[1] + result_rect[3], result_rect[0] : result_rect[0] + result_rect[2]]
+		
+		#強制的に抽出された傷からすべてを設定します
+		
+		if(rect[2] >= rect[3]):#x方向に大きいとき
+			long_axi = rect[2]
+			short_axi = rect[3]
+			max_point1 = np.array([rect[0] ,g_point[1]])
+			max_point2 = np.array([rect[0] + rect[2], g_point[1]])
+			min_point1 = np.array([g_point[0],rect[1]])
+			min_point2 = np.array([g_point[0],rect[1] + rect[3]])
+			
+		else:#y方向に大きいとき
+			long_axi = rect[3]
+			short_axi = recr[2]
+			max_point1 = np.array([g_point[0],rect[1]])
+			max_point2 = np.array([g_point[0],rect[1] + rect[3]])
+			min_point1 = np.array([rect[0] ,g_point[1]])
+			min_point2 = np.array([rect[0] + rect[2], g_point[1]])
+			
+		flag = "non_openness"
+		
+		return max_point1, max_point2, min_point1, min_point2, long_axi, short_axi, flag
 	
 	#重心と一番近いエッジのｘ座標が等しいとき
-	if(g_point[0] == min_point1[0]):
+	elif(g_point[0] == min_point1[0]):
 		x = g_point[0]
 		
 		#cv.drawMarker(img, (min_point1[0], min_point1[1]), (0, 255, 255), markerType=cv.MARKER_TILTED_CROSS, markerSize=5)
@@ -239,12 +267,12 @@ def detect_figure(img):#重心を使って最短辺から最長辺を求める
 	#cv.drawMarker(img, (max_point2[0], max_point2[1]), (255, 255, 255), markerType=cv.MARKER_TILTED_CROSS, markerSize=5)
 	#cv.imshow("points",img)
 	
-	return max_point1, max_point2, min_point1, min_point2, long_axi, short_axi
+	return max_point1, max_point2, min_point1, min_point2, long_axi, short_axi, flag
 	
 def detect_edge(img):#形を求める
 	tmp_img = edge_detection(img)
 	img_edge = img
-	max_point1, max_point2, min_point1, min_point2, long_axi, short_axi = detect_figure(img)
+	max_point1, max_point2, min_point1, min_point2, long_axi, short_axi, flag = detect_figure(img)
 	
 	g_point = find_gravity_r(img)
 	k = (max_point1[1] - max_point2[1])/(max_point1[0] - max_point2[0])
@@ -263,7 +291,6 @@ def detect_edge(img):#形を求める
 		for i in range(int(long_axi)):
 			x = max_point1[0] - i
 			y = int(round(k * x + b))
-			c = y + 1 / k * x
 			tmp_point1 = []
 			tmp_point2 = []
 			center = np.array([x, y])
@@ -333,7 +360,7 @@ def detect_edge(img):#形を求める
 		for i in range(int(long_axi)):
 			x = max_point1[0] - i
 			y = int(round(k * x + b))
-			c = y + 1 / k * x
+			c = y + 1 / k / x
 			tmp_point1 = []
 			tmp_point2 = []
 			center = np.array([x, y])
@@ -403,7 +430,7 @@ def detect_edge(img):#形を求める
 		for i in range(int(round(long_axi))):		
 			x = max_point1[0] + i
 			y = int(round(k * x + b))
-			c = y + 1 / k * x
+			c = y + 1 / k / x
 			tmp_point1 = []
 			tmp_point2 = []
 			center = np.array([x, y])
@@ -472,11 +499,14 @@ def detect_edge(img):#形を求める
 	#cv.drawMarker(img_edge, (g_point[0], g_point[1]), (0, 255, 0), markerType=cv.MARKER_TILTED_CROSS, markerSize=15)
 	#cv.imshow("edge",img_edge)
 	#cv.imshow("img",tmp_img)
-	return size, distance, short_axi, edge_side1, edge_side2
+	return size, distance, short_axi, edge_side1, edge_side2, flag
 	
 
 def oval_judge(img):
-	size, distance, short_axi, e1, e2 = detect_edge(img)
+	size, distance, short_axi, e1, e2, flag = detect_edge(img)
+	
+	if(flag == "non_openness"):#非開放性の時
+		return 0
 	
 	#傷が円に近いほどsinとの誤差が小さくなる
 	sin_x = np.arange(0,distance.index(max(distance))+1, 1)
@@ -496,7 +526,11 @@ def oval_judge(img):
 		return 0
 
 def edge_judge(img):#創縁不整と創縁直線を判定
-		size, distance, short_axi, edge_side1, edge_side2 = detect_edge(img)
+		size, distance, short_axi, edge_side1, edge_side2, flag = detect_edge(img)
+		
+		if(flag == "non_openness"):#非開放性の時
+			return 1, 0
+		
 		edge_irregular = 0
 		edge_straight = 0
 		
@@ -531,7 +565,13 @@ def edge_judge(img):#創縁不整と創縁直線を判定
 		return edge_irregular, edge_straight
 
 def sharp_judge(img):
-	size, distance, short_axi, e1, e2 = detect_edge(img)
+	size, distance, short_axi, e1, e2, flag = detect_edge(img)
+	
+	if(flag == "non_openness"):#非開放性の時
+		return 0 ,0, 0, 1
+	
+	
+	
 	cos_x = np.arange(0,distance.index(max(distance))+1, 1)
 	cos_y = np.cos(cos_x/(distance.index(max(distance)))*math.pi)*short_axi
 	
@@ -571,13 +611,16 @@ def sharp_judge(img):
 	#plt.show()
 	
 	if(fw_result < 0.5 and bw_result < 0.5):#どちらの端も0.5未満なら創端鋭利
-		return 1, 0
+		return 1, 0, 1, 0
 		
 	elif(fw_result >= 0.5 and bw_result >= 0.5):#どちらの端も0.5未満なら創端太
-		return 0, 1
+		return 0, 1, 1, 0
 		
-	else:#どちらかの端点が太く、もう一方が鋭利
-		return 0, 0
+	elif((fw_result < 0.5 or bw_result < 0.5) and (fw_result >= 0.5 and bw_result >= 0.5)):#どちらかの端点が太く、もう一方が鋭利
+		return 1, 1, 1, 0
+		
+	else:
+		return 0, 0, 1, 0
 		
 
 def contrast(image, a):#(aはゲイン)
@@ -820,12 +863,14 @@ def judge(img):
 	edge_irregular = 0
 	edge_straight = 0
 	oval = 0
+	openness = 0
+	non_openness = 0
 	
 	detect_figure(img)
 	detect_edge(img)
 	
 	#創傷端を判定
-	end_sharp, end_thick = sharp_judge(img)
+	end_sharp, end_thick, openness, non_openness = sharp_judge(img)
 	
 	#創傷縁を判定
 	edge_irregular, edge_straight = edge_judge(img)
@@ -836,7 +881,8 @@ def judge(img):
 	#色の判定
 	#palette = color_judge(toLab(img))
 	
-	print("創端鋭利："+str(end_sharp)+"　創端太："+str(end_thick)+" 創縁不整："+str(edge_irregular)+" 創端直線："+str(edge_straight)+"　円度："+ str(oval))
+	print("創端鋭利："+str(end_sharp)+"　創端太："+str(end_thick)+" 創縁不整："+str(edge_irregular)+" 創縁直線："+str(edge_straight)+"　円度："+ str(oval)
+	+"　開放性："+ str(openness)+"　非開放性："+ str(non_openness))
 	
 	result = [end_sharp, end_thick, edge_irregular, edge_straight, oval]
 	
