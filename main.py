@@ -5,11 +5,15 @@ import os, sys, time
 import cv2 as cv
 from PIL import Image
 import numpy as np
+np.set_printoptions(threshold=np.inf)
+import pandas as pd
 import math
 import matplotlib.pyplot as plt
 import glob
 from statistics import mean, stdev
 import seaborn as sns
+import csv
+import collections as cl
 
 #研究室で研究するとき
 #path = "./sample/incision_1.jpg"
@@ -19,6 +23,161 @@ path = "D:\Sotsuken\Sotsuken_repo\sample\\*"
 
 N = 1000
 
+thresh = 1.0E-10
+
+#
+#
+#意味の数学モデル
+#
+#
+
+#閾値
+e = -1
+
+
+def flatten(data):
+    for item in data:
+        if hasattr(item, '__iter__'):
+            for element in flatten(item):
+                yield element
+        else:
+            yield item
+
+def make_semantic_matrix(data_mat):#意味行列を作るためのに作成したセマンティックな行列を入力
+	
+	#相関行列の作成
+	relation_mat = np.dot(np.array(data_mat).T, np.array(data_mat))
+	eig_val, eig_vec = np.linalg.eig(relation_mat)#固有値と固有ベクトルを取得
+	#print(eig_val)
+	#print(eig_vec)
+	
+	return eig_vec
+	
+
+#文脈の作成
+def make_context(sem_mat, word_list, contex_word, data):#意味行列に文脈を指定する単語リストを入力
+	global e
+	contex_mat = []
+	count = 0
+	
+	#相関行列(データ行列では列が画像行が単語なので代わりに相関行列を利用)
+	relation_mat = np.dot(np.array(data).T, np.array(data))
+	relation_mat[7]
+	for word in contex_word:#文脈として選んだ言葉のみ抽出
+		if(word == "color"):#文脈として色を選んだ場合
+			for i in range(100):
+				contex_mat.append(relation_mat[i + 7])
+				
+		contex_mat.append(relation_mat[word_list.index(word)])
+	
+	contex_vec_list = contex_mat
+	#print(contex_mat)
+	
+	#文脈語群と意味素の内積を計算
+	c_hat =[]
+	for contex in contex_mat:
+		c_tmp = np.matrix(contex) * np.matrix(sem_mat).T
+		c_hat.append(c_tmp)
+	
+	#重心の計算
+	#print(len(word_list))
+	contex_mat = [0] * 107
+	
+	for c in c_hat:
+		#print(contex_mat)
+		contex_mat = np.array(contex_mat) + np.array(c)
+		
+	contex_mat = contex_mat / np.linalg.norm(contex_mat)
+		
+	sem_contex = []#文脈を与えた意味行列
+	count = 0#カウンター
+	#print(contex_mat)
+	for i in contex_mat[0]:
+		if(i > e):
+			#print("Hello")
+			sem_contex.append(sem_mat[count])
+		count += 1
+		
+	#もし閾値を超えるような意味素がなければもともとの意味行列を返す	
+	if(len(sem_contex) == 0):
+		return sem_mat, contex_vec_list
+	#print(sem_contex)
+	
+	else:
+		return sem_contex, contex_vec_list
+	
+#意味空間への射影
+def sem_projection(sem_mat, sem_contex, data, input_img, contex_vec_list):#dataはデータベースにある画像、input_imgは今回のメイン画像	
+	global thresh#閾値以下の距離は0にする処理のための閾値
+	input_vec = np.matrix(input_img) * np.matrix(sem_contex).T
+	data_vec = np.matrix(data) * np.matrix(sem_contex).T
+	data_dis =[]#入力データと各データとの距離を記録する
+	#print("input:"+str(input_vec))
+	#print("data:"+str(data_vec))
+	#count = 0
+	
+	
+	#重みｃの計算
+	#以下で割る用のベクトルを作成
+	div_vec =[]
+	for s in sem_mat:
+		u = 0
+		for c in contex_vec_list:
+			u += np.dot(np.array(c) , np.array(s))
+		div_vec.append(u)
+	
+	#すべての文脈語と意味素の内積和をすべての意味素における、すべての文脈語と意味素との内積の和を並べてベクトル化したモノのノルムで割る
+	weigth_c = []#各意味素における重みを入れておく箱
+	#print(sem_contex)
+	
+	for f in sem_contex:
+		w = 0
+		for c in contex_vec_list:
+			w += np.dot(np.array(c), np.array(f))
+			#print(w)
+		weigth_c.append(w / np.linalg.norm(div_vec))
+	
+	#np.array(input_vec)
+	#print(input_vec)
+	#距離の計算
+	#各（文脈から選抜した）意味素において重みを与えて計算する
+	for d in data_vec.tolist():
+		count = 0
+		tmp = np.array(d) - np.array(input_vec.reshape(-1,))
+		tmp = tmp.reshape(-1,)#なんか二次元配列になっちゃう問題
+		dis = 0
+		
+		for w in weigth_c:
+			#print(tmp)
+			#print(w)
+			tmp[count] *= w
+			count += 1
+			
+		for t in tmp:
+			dis += t * t
+		dis = math.sqrt(dis)
+		
+		if(dis < thresh):
+			dis = 0
+			
+		data_dis.append(dis)
+	
+	#for d in data_vec:
+	#	dis = np.linalg.norm(d - input_vec)
+	#	data_dis.append(dis)
+		#print(str(count) + " : " + str(dis))
+		#count += 1
+		
+	return data_dis
+
+
+
+
+#
+#
+#画像処理
+#
+#
 
 def edge_detection(img):
 	tmp_img = cv.cvtColor(img, cv.COLOR_BGR2GRAY)#グレースケールに変換
@@ -865,22 +1024,22 @@ def toLab(img):
 	#aa.set_zlabel("Z")
 	#plt.show()
 
-	#src1 = cv.imread('D:\Sotsuken\Sotsuken_repo\output\heat_map.png')
-	#src2 = cv.imread('D:\Sotsuken\Sotsuken_repo\output\Lab2.jpg')
+	src1 = cv.imread('D:\Sotsuken\Sotsuken_repo\output\heat_map.png')
+	src2 = cv.imread('D:\Sotsuken\Sotsuken_repo\output\Lab2.jpg')
 	#cv.imshow('src', src1)
-	#cv.rectangle(src1, (70, 50), (490, 440), (255, 0, 255), thickness=8, lineType=cv.LINE_4)
+	cv.rectangle(src1, (70, 50), (490, 440), (255, 0, 255), thickness=8, lineType=cv.LINE_4)
 
-	#rect = (80,58, 397, 368)
-	#src1 = src1[ rect[1] : rect[1] + rect[3], rect[0] : rect[0] + rect[2]]
+	rect = (80,58, 397, 368)
+	src1 = src1[ rect[1] : rect[1] + rect[3], rect[0] : rect[0] + rect[2]]
 	#色の表示系がずれているので回転
-	#src1 = cv.rotate(src1, cv.ROTATE_90_COUNTERCLOCKWISE)
+	src1 = cv.rotate(src1, cv.ROTATE_90_COUNTERCLOCKWISE)
 
-	#src1 = cv.resize(src1, src2.shape[1::-1])
-	#dst = cv.addWeighted(src1, 0.5, src2, 0.5, 0)
+	src1 = cv.resize(src1, src2.shape[1::-1])
+	dst = cv.addWeighted(src1, 0.5, src2, 0.5, 0)
 
 	#cv.imshow('result.jpg', dst)
 	#cv.waitKey()
-	return list(set(color_list))
+	return list(set(color_list)), dst
 	
 def color_judge(color_list):
 	palette = [0]*100
@@ -1200,7 +1359,7 @@ def pullpush_judge(img):#文字列でpullかpushかを返します
 		return "pull"
 
 
-def judge(img):
+def judge(id, img):
 	end_sharp = 0
 	end_thick = 0
 	edge_irregular = 0
@@ -1212,6 +1371,9 @@ def judge(img):
 	detect_figure(img)
 	detect_edge(img)
 	
+	#エッジのイメージを代入
+	edge_img = edge_detection(img)
+	
 	#創傷端を判定
 	end_sharp, end_thick, openness, non_openness = sharp_judge(img)
 	
@@ -1222,35 +1384,142 @@ def judge(img):
 	oval = oval_judge(img)
 	
 	#色の判定
-	palette = color_judge(toLab(img))
+	color_list, color_hist_img = toLab(img)
+	palette = color_judge(color_list)
 	
-	print("創端鋭利："+str(end_sharp)+"　創端太："+str(end_thick)+" 創縁不整："+str(edge_irregular)+" 創縁直線："+str(edge_straight)+"　円度："+ str(oval)
-	+"　開放性："+ str(openness)+"　非開放性："+ str(non_openness))
+	#print("創端鋭利："+str(end_sharp)+"　創端太："+str(end_thick)+" 創縁不整："+str(edge_irregular)+" 創縁直線："+str(edge_straight)+"　円度："+ str(oval)
+	#+"　開放性："+ str(openness)+"　非開放性："+ str(non_openness))
 	
-	result = [end_sharp, end_thick, edge_irregular, edge_straight, oval]
+	
+	#画像データをまとめる(画像は書き出してパスをわたすことにした)
+	result_path = 'D:\\Sotsuken\\Sotsuken_repo\\result\\'
+	path1 = str(result_path)+ 'original_img\\ori_img_' + str(id) + '.jpg'
+	path2 = str(result_path)+ 'edge_img\\edge_img_'+str(id)+'.jpg'
+	path3 = str(result_path)+ 'color_hist_img\\color_hist_img_'+str(id)+'.jpg'
+	
+	cv.imwrite(path1, img)
+	cv.imwrite(path2, edge_img)
+	cv.imwrite(path3, color_hist_img)
+	
+	result = [end_sharp,end_thick,edge_irregular,edge_straight,oval,openness,non_openness]
 	
 	#色情報と合成
 	result.extend(palette)
 	
-	return result
+	#辞書作成
+	data = {'original_img' : path1, 'edge_img':path2,
+				'color_hist_img':path3, 'color': color_list}
+
+
+	
+	return result,data
 	
 	
 def read_img(folder):#フォルダを指定して
 	files = glob.glob(folder)
+	results = []
 	data_list = []
+	id = 0
+	
 	for file in files:
 		#print(file)
 		img = cv.imread(file, cv.IMREAD_COLOR)
 		#sharp, oval, pull, push = judge(img)
+		result, data = judge(id, img)
+		data_list.append(data)
+		results.append(result)
+		id += 1
+	
+		#print(data_list)
+	with open('D:\\Sotsuken\\Sotsuken_repo\\result\\output_file\\img_infos.csv', 'w') as f:
+		writer = csv.DictWriter(f, ['original_img', 'edge_img', 'color_hist_img', 'color'])
+		#ヘッダの書き込み
+		#writer.writeheader()
 		
-		data_list.append(judge(img))
+		for data in data_list:
+			#print(data)
+			writer.writerow(data)
+			
+	with open('D:\\Sotsuken\\Sotsuken_repo\\result\\output_file\\img_vec.csv', 'w') as f:
+		writer2 = csv.writer(f)
+		for row in results:
+			writer2.writerow(row)
+		
+	return results
 	
-	return data_list
 	
+def mmm_operation(path):
+	results = read_img(path)
+	#data_listhは画像のパスまで入っている
+	#resultsは単純にベクトルのみ
+	#print(data_list)
+	
+	#word_listに色追加しなくちゃいけない、、、。
+	#word_list = ["end_sharp","end_thick","edge_irregular","edge_straight","oval","openness","non_openness"]
+	sem_mat = make_semantic_matrix(results)
+	#sem_data = cl.OrderedDict()
+	
+	#意味空間をｃｓｖで出力
+	#with open('D:\\Sotsuken\\Sotsuken_repo\\result\\output_file\\sem_mat.csv', 'w') as f:
+	#	writer = csv.writer(f)
+		#writer.writerow(word_list)
+	#	for row in sem_mat:
+	#		writer.writerow(row)
+	
+	#まずすべての文脈において距離計算
+	word_list = ["end_sharp","end_thick","edge_irregular","edge_straight","oval","openness","non_openness","color"]
+	contex_word = ["end_sharp","end_thick","edge_irregular","edge_straight","oval","openness","non_openness","color"]
+	
+	#文脈の種類を作成
+	contex_list = []
+	c_list = ["all","incision", "contusion"]#文脈の順番を格納
+	all_contex = contex_word
+	incision_contex = ["end_sharp", "edge_straight", "openness"]
+	contusion_contex = ["end_thick","edge_irregular","oval","non_openness","color"]
+	contex_list.append(all_contex)
+	contex_list.append(incision_contex)
+	contex_list.append(contusion_contex)
+	
+	sem_contex, contex_vec_list = make_context(sem_mat, word_list, contex_word, results)
+	
+	count = 0
+	for contex_word in contex_list:#全てのコンテクストについて距離を計算しdistance_listに格納
+		distances_list = []
+		distances = []#各画像から画像までの距離
+		
+		sem_contex, contex_vec_list = make_context(sem_mat, word_list, contex_word, results)
+		
+		for img_vec in results:#画像毎にdataとの距離計算
+			#print(img_vec)
+			distances = sem_projection(sem_mat, sem_contex, results, img_vec, contex_vec_list)
+			distances_list.append(distances)
+			
+		with open('D:\\Sotsuken\\Sotsuken_repo\\result\\output_file\\context_dist\\'+str(count)+'_'+c_list[count]+'_context.csv', 'w') as f:
+			writer = csv.writer(f)
+			for distances in distances_list:
+				writer.writerow(distances)
+			
+		count += 1
+			
+		
+		
+	#文脈毎にcsvで出力
+		
+	
+	#print(data_list)
+
 
 if __name__ == '__main__':
-	data = read_img(path)
-	print(data)
+
+	#意味空間を構成するための画像群（のちのLMMLファイル）が入っているフォルダのパスを渡す
+	mmm_operation(path)
+	
+	#実際に距離計算を行いたい画像群の（のちのLMMLファイル）を渡す
+	#similarity_operation(path)
+	
+	
+	
+	
 		#img = cv.imread(path)
 		#img_edge = cv.imread(path)
 		#judge(img)
