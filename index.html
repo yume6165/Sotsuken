@@ -2,35 +2,158 @@
 <html>
   <head>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.css" rel="stylesheet">
-    <style type="text/css">
-      #network {
-        width:  400px;
-        height: 400px;
-        border: 1px solid #000;
-      }
-    </style>
+  
+    <link rel="stylesheet" type="text/css" href="./style.css">
+    
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js"></script>
+   
+    <!--chart.jsを利用-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.1.4/Chart.min.js"></script>
+  
   </head>
   <body>
+    <h1>THEMIS</h1>
+    <p id="subtitle">-THeoretical Estimation of Meaning of InSult-</p>
+
+    <div id="select_context">
+    <form name="select_context">
+    <select name="select_context">
+    <option value="0">All</option>
+    <option value="1">Incision</option>
+    <option value="2">Contusion</option>
+    </select>
+      
+    <button type="button" name="select_context" onclick="app_context()">
+    <font size="1">適用</font>
+    </button>
+    </form>
+    </div>
+    <!--棒グラフ表示-->
+    <canvas id="stage" style="position:relative;　height:40vh; width:80vw"></canvas>
 
     
+    <!--ネットワーク表示-->
     <div id="network"></div>
-    <script type="text/javascript">
+    <div id="mater">
+      Color_mater
+    </div>
+    
+    <!--創傷の情報表示-->
+    <div id="wound_feild">
+      <div id="wound_img_name">
+        <image id="wound_ori_img" title="wound" src="https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2Fnone_icon.svg?v=1576918386493" height="100"></image>
+        <image id="wound_edge_img" title="wound_edge" src="https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2Fnone_icon.svg?v=1576918386493" height="100"></image>
+        <p id="wound_name">Wound Name</p>
+      </div>
       
+      <div id="wound_figure">
+        <form name="wound_figure">
+        <input type="image" id="close_icon" title="close" src="https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2Fclose_icon.svg?v=1576909771220" height="35" width="35">
+        <input type="image" id="open_icon" title="open" src="https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2Fopen_icon.svg?v=1576909771233" height="35" width="35">
+        <input type="image" id="end_sharp_icon" title="end_sharp" src="https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2Fend_sharp_icon.svg?v=1576909771247" height="35" width="35">
+        <input type="image" id="end_irregular_icon" title="end_irregular" src="https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2Fend_irregular_icon.svg?v=1576909771602" height="35" width="35">
+        <br>
+        <input type="image" id="end_thick_icon" title="end_thick" src="https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2Fend_thick_icon.svg?v=1576909771586" height="35" width="35">
+        <input type="image" id="edge_straight_icon" title="edge_straight" src="https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2Fedge_straight_icon.svg?v=1576909771594" height="35" width="35">
+        <input type="image" id="edge_irregular_icon" title="edge_irregular" src="https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2Fedge_irregular_icon.svg?v=1576909771240" height="35" width="35">
+        <input type="image" id="oval_icon" title="oval" src="https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2Foval_icon.svg?v=1576917665497" height="35" width="35">
+          <!--<input type="image" id="contusion_bruise_icon" title="contusion_bruise" src="https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2Fcontusion_bruise.svg?v=1576909771874" height="35" width="35">-->
+        </form>
+      </div>
+      
+      <div id="wound_color">
+        <image id="wound_color_map" title="wound_color_map" src="https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2Fnone_icon.svg?v=1576918386493" height="140" width="140"></image>
+      </div>
+      
+    </div>
+    
+    <script type="text/javascript">
+function define_edge_color(w, max, min)
+      {
+        def = max - min;
+        w  = Math.round(w * 256 / def);
+        m  = Math.round(min * 256 / def);
+        w -= m;
+        console.log(w);
+        //入ってきたエッジの重みからいエッジの色を決定
+        if(w < 16){
+          var r = 0;
+          var g = 0;
+          var b = w;
+        }
+        else if(w >= 16 && w < 120){
+          var r = 0;
+          var g = Math.round((w - 16) * 104 / 256);
+          var b = Math.round(256 + (w - 16) * -104 / 256);
+          
+        }
+        else if(w >= 120 && w < 136)
+        {
+          var r = 0;
+          var g = w;
+          var b = 0;
+        }
+        else if(w >= 136 && w < 240){
+          var r = Math.round((w - 136) * 104 / 256);
+          var g = Math.round(256 + (w - 136) * -104 / 256);
+          var b = 0;
+          
+        }
+        else if(w >= 240 && w < 256)
+        {
+          var r = w;
+          var g = 0;
+          var b = 0;
+        }  
+        
+       // console.log(r);
+        
+        var rgb = [];
+        rgb.push(r);
+        rgb.push(g);
+        rgb.push(b);
+        c = RGB2Hex(rgb);
+        
+        return c;
+      } 
+      
+function define_edge_color2(w, max, min)
+      {
+        def = max - min;
+        w  = Math.round(w * 255 / def);
+        m  = Math.round(min * 255 / def);
+        w -= m;
+       // console.log(w);
+        //入ってきたエッジの重みからいエッジの色を決定
+        var r = Math.floor(w * 180 / 256 + 75);
+        var g = Math.round(w * 215 / 256);
+        var b = Math.round(130 - w * 130 / 256);
+        
+       // console.log(r + ' , ' + g + ' , '+ b);
+        
+        var rgb = [];
+        rgb.push(r);
+        rgb.push(g);
+        rgb.push(b);
+        c = RGB2Hex(rgb);
+        
+        return c;
+      }  
+
 function RGB2Hex(rgb)//３次元配列で入力
       {
         color_list = []
-        r1 = String(rgb[0] / 16);
+        r1 = String(Math.floor(rgb[0] / 16));
         color_list.push(r1);
-        r2 = String(rgb[0] % 16);
+        r2 = String(Math.floor(rgb[0] % 16));
         color_list.push(r2);
-        g1 = String(rgb[1] / 16);
+        g1 = String(Math.floor(rgb[1] / 16));
         color_list.push(g1);
-        g2 = String(rgb[1] % 16);
+        g2 = String(Math.floor(rgb[1] % 16));
         color_list.push(g2);
-        b1 = String(rgb[2] / 16);
+        b1 = String(Math.floor(rgb[2] / 16));
         color_list.push(b1);
-        b2 = String(rgb[2] % 16);
+        b2 = String(Math.floor(rgb[2] % 16));
         color_list.push(b2);
         var color = '#';
         
@@ -39,8 +162,8 @@ function RGB2Hex(rgb)//３次元配列で入力
           if(color_list[i] >= 10)
           {
               switch(color_list[i])
-              {
-                case '10': color_list[i] ="A"
+              { 
+                case '10': color_list[i] ="A";
                   break;
                 case '11': color_list[i] ="B";
                   break;
@@ -57,7 +180,8 @@ function RGB2Hex(rgb)//３次元配列で入力
           }
           color += color_list[i];
         }
-        
+        //console.log(color);
+        return color;
         
       }
 
@@ -77,12 +201,13 @@ function csvToArray(path) {
         return csvData;
 }
       
-      //ここからグラフ描画のための準備
       
-      distance = [];
-      distances = []
       
+      //データのインプット
       //forで回したいけど方法がわからない
+      //類似度を入力
+      distance = [];
+      distances = [];
       distance.push(csvToArray("https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2F0_all_context.csv?v=1576165789415"));
       distances.push(distance);
       distance.push(csvToArray("https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2F1_incision_context.csv?v=1576165789283"));
@@ -91,9 +216,30 @@ function csvToArray(path) {
       distances.push(distance);
       
       
-      console.log(distances);
+      //画像データを読み込み
+      img_info = [];
+      img_info.push(csvToArray("https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2Fimg_infos.csv?v=1576830483260"));
+      //余分な配列を削除する
+      //console.log(img_info[0]);
+      for(var i=0; i < Math.floor((img_info[0].length) / 2)+1; i++)
+      { 
+          img_info[0].splice(1 + i, 1);
+      }
+     // console.log(img_info[0]);
+      
+      
+      //画像のベクトルを読み込み
+      img_vec = [];
+      img_vec.push(csvToArray("https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2Fimg_vec.csv?v=1576830518437"));
+      //console.log(img_vec[0]);
+      
+      //console.log(distances);
       c_num = distances.length;
       i_num = distance[0].length;
+      
+      
+      
+      
       
       //各文脈に関してノードを生成（どの文脈でもノードは変わらないからいらない説）
       context_nodes_list =[];
@@ -102,13 +248,167 @@ function csvToArray(path) {
         node_list = [];
         for(var i = 0; i < i_num; i++)
         {
-          var a = {id: i, label: String(i)};
+          var a = {id: i, label: String(i), color:"#ffff00"};
           node_list.push(a);
         }
         var nodes = new vis.DataSet(node_list);
         context_nodes_list.push(nodes);
       }
       
+      //重みの計算（文字列から数字に変換）
+      w_list = [];//全体まとめる
+      for(var k=0; k < c_num; k++)
+      {
+        w_context_list=[];//コンテクストごと
+        for(var i = 0; i < i_num; i++)
+        {
+          for(var j = 0; j < i_num ; j++)
+          {
+            //console.log(distances[0][k][i][j])
+            if(parseFloat(distances[0][k][i][j]) == 0)
+            {
+              w_context_list.push(0);
+              continue;
+            }
+            w_context_list.push(1/(parseFloat(distances[0][k][i][j])));
+           //console.log(w_list);
+          }
+        }
+        w_list.push(w_context_list);
+       
+      }
+      
+      //console.log(w_list);
+      var max_list = [];
+      var min_list = [];
+      for(var i=0; i < c_num; i++)
+      {
+
+          max_list.push(Math.max.apply(null, w_list[i]));
+          var min_tmp = w_list[i].slice();//コピー
+          min_tmp = min_tmp.sort();
+          min_list.push(min_tmp[i_num]);//2番目に大きい数
+       // w_mid = (w_max + w_min) / 2;
+        
+      }
+     // console.log(max_list);
+     // console.log(min_list);
+      //最終的な最大値
+      w_max = Math.max.apply(null,max_list);
+      w_min = Math.min.apply(null,min_list);
+      //console.log(w_max);
+      //console.log(w_min);
+      
+function sort_data(w, index, context)
+      {
+        var a = Math.sqrt(w[context].length);//データの数
+        var tmp = w[context];
+       // console.log(w);
+        tmp = tmp.slice(index * a, index * a + a);
+        tmp = tmp.sort(
+                        function(a,b) {
+                        // 戻り値が正（b-aの差が正）のとき、aをbの前に並べ替え
+                        // 戻り値が負（b-aの差が負）のとき、aをbの後ろ並べ替え
+                        return b - a;
+                      }
+                      );
+
+        //console.log(w[0][context]);
+        var result_labels = [];
+        for(var i=0; i < a - 1; i++)
+        {
+          var num = w_list[context].indexOf(tmp[i]);
+          var name = "Wound_" + String(num);
+          result_labels.push(name);
+        }
+        //console.log(result_labels);
+        var max = Math.max.apply(null, tmp);
+        var result =[];
+        result.push(result_labels);
+        result.push(tmp);
+        result.push(max);
+        //console.log(tmp);
+        return result;
+
+      }
+      
+      
+      //ここから棒グラフ描画のための準備
+      var labels = [];
+      var data = [];
+      var sort_data = sort_data(w_list, 0, 0);//初期値は0
+      //console.log(sort_data);
+      var stage = document.getElementById('stage').getContext("2d");
+      var myBar = new Chart(stage,{
+        type: 'horizontalBar',
+        data:{
+          labels:sort_data[0],
+          datasets:[{
+            data:sort_data[1],
+            backgroundColor:['#FF4444', '#4444FF', '#44BB44', '#FFFF44', '#FF44FF']
+          }]
+        },
+         options: {                             //◆オプション
+            responsive: true,                  //グラフ自動設定
+            legend: {                          //凡例設定
+                display: false                 //表示設定
+           },
+            title: {                           //タイトル設定
+                display: false,                 //表示設定
+                fontSize: 18,                  //フォントサイズ
+                text: 'タイトル'                //ラベル
+            },
+            scales: {                          //軸設定
+                yAxes: [{                      //y軸設定
+                    display: true,             //表示設定
+                    barPercentage: 0.4,           //棒グラフ幅
+                    categoryPercentage: 0.4,
+                    scaleLabel: {              //軸ラベル設定
+                       display: false,          //表示設定
+                       labelString: '創傷',  //ラベル
+                       fontSize: 11               //フォントサイズ
+                    },
+                    ticks: {                      //最大値最小値設定
+                        min: 0,                   //最小値
+                        max: sort_data[2],                  //最大値
+                        fontSize: 11,             //フォントサイズ
+                        stepSize: 5               //軸間隔
+                    },
+                }],
+                xAxes: [{                         //x軸設定
+                    display: true,                //表示設定
+                    barPercentage: 0.2,           //棒グラフ幅
+                    categoryPercentage: 0.2,      //棒グラフ幅
+                    scaleLabel: {                 //軸ラベル設定
+                       display: true,             //表示設定
+                       labelString: '類似度',  //ラベル
+                       fontSize: 11               //フォントサイズ
+                    },
+                    ticks: {
+                        fontSize: 11             //フォントサイズ
+                    },
+                }],
+            },
+            layout: {                             //レイアウト
+                padding: {                          //余白設定
+                    left: 50,
+                    right: 100,
+                    top: 0,
+                    bottom: 0
+                }
+            }
+        }
+    });
+        
+      
+      
+     // for(var i=0; i < c_num; i++)
+     // {
+        
+     // }
+      
+      
+      //ここからグラフ描画のための準備
       context_edges_list =[];
       for(var k=0; k < c_num; k++)
       {
@@ -117,11 +417,27 @@ function csvToArray(path) {
         {
           for(var j = i+1; j < i_num ; j++)
           {
-            w = Number(distances[0][k][i][j])*5;//数字かけて太さをわかりやすくしている
+            w = Number(distances[0][k][i][j]);
             //console.log(distances[0][k][i][j]);
+            var w_tmp = 1 / w;
+            w = 3 / w;
             
+            //console.log(w_max);
             
-            var a = {from: i, to: j, width:w, color:'red'};
+            //色を決定する
+            //console.log(w_max);
+            var c = define_edge_color2(w_tmp, w_max, w_min);
+            
+          //  var r = Math.round(Math.abs(w_max - w_tmp) / w_max * 255);
+          //  var g = Math.round(Math.abs(w_mid - w_tmp) / w_max * 255);
+          //  var b = Math.round(Math.abs(w_min - w_tmp) / w_max * 255);
+          //  var rgb = [];
+          //  rgb.push(r);
+          //  rgb.push(g);
+          //  rgb.push(b);
+          //  c = RGB2Hex(rgb);
+            
+            var a = {from: i, to: j, width:w, color:{color:c}};
             edge_list.push(a);
           }
         }
@@ -137,7 +453,20 @@ function csvToArray(path) {
         nodes: context_nodes_list[0],
         edges: context_edges_list[0]
       };
+      
       var options = {
+        
+        nodes: {
+          shape: "dot",
+          size: 10,
+        borderWidth: 1
+      }, 
+        
+         edges: {
+           smooth: true,
+           //shadow: true,
+         }
+        
         
       };
       var network = new vis.Network(container, data, options);
@@ -148,12 +477,98 @@ function csvToArray(path) {
         if (params.nodes.length == 1) {
           var nodeId = params.nodes[0];
           var node = nodes.get(nodeId);
+          var option_select = {
+        
+          nodes: {
+                    shape: "dot",
+                    size: 10,
+                    borderWidth: 2
+                  }, 
+          edges: {
+                   smooth: true,
+                 //shadow: true,
+                 }
+      
+          };
+          network.setOptions(option_select);
           console.log(node.label + 'がクリックされました');
+          
+          
+          //nodeIDから情報を習得して創傷の情報を表示
+          //傷画像の表示
+          var wound_ori_img = document.getElementById("wound_ori_img");
+          var wound_edge_img = document.getElementById("wound_edge_img");
+          var wound_color_map = document.getElementById("wound_color_map");
+          wound_ori_img.src = img_info[0][nodeId][0];
+          wound_edge_img.src = img_info[0][nodeId][1];
+          wound_color_map.src = img_info[0][nodeId][2];
+          
+          //iconの透過度を変更
+          //console.log(img_vec[0][nodeId]);
+          var open_icon = document.getElementById("open_icon");
+          var close_icon = document.getElementById("close_icon");
+          var end_sharp_icon = document.getElementById("end_sharp_icon");
+          var end_irregular_icon = document.getElementById("end_irregular_icon");
+          var end_thick_icon = document.getElementById("end_thick_icon");
+          var edge_straight_icon = document.getElementById("edge_straight_icon");
+          var oval_icon = document.getElementById("oval_icon");
+          //var contusion_bruise_icon = document.getElementById("contusion_bruise_icon");
+          
+          //透過度の初期化（全て透過度0.3へ）
+          open_icon.style.opacity = 0.3;
+          close_icon.style.opacity = 0.3;
+          end_sharp_icon.style.opacity = 0.3;
+          end_irregular_icon.style.opacity = 0.3;
+          end_thick_icon.style.opacity = 0.3;
+          edge_straight_icon.style.opacity = 0.3;
+          oval_icon.style.opacity = 0.3;
+          
+          if(img_vec[0][nodeId][0] == "1")
+            end_sharp_icon.style.opacity = 1.0;
+          
+          if(img_vec[0][nodeId][1] == "1")
+            end_thick_icon.style.opacity = 1.0;
+              
+          if(img_vec[0][nodeId][2] == "1")
+            edge_irregular_icon.style.opacity = 1.0;
+              
+          if(img_vec[0][nodeId][3] == "1")
+            edge_straight_icon.style.opacity = 1.0;
+              
+          if(img_vec[0][nodeId][4] == "1")
+            oval_icon.style.opacity = 1.0;
+              
+          if(img_vec[0][nodeId][5] == "1")
+            open_icon.style.opacity = 1.0;
+              
+          if(img_vec[0][nodeId][6] == "1")
+            close_icon.style.opacity = 1.0;
+         
+         //end_irregularはまだ実装してないので保留
+         // if(img_vec[0][nodeId][7] == "1")
+         //   end_irregular_icon.style.opacity = 1.0;
+              
+           
         }
       });
       
-      
-      
+    function app_context()//文脈を読み込んで表示
+      {
+        //console.log("app_contextが押されました");
+        var context = document.select_context.select_context;
+        var num = Number(context.selectedIndex.value);
+        console.log(num);
+        var d = {
+        nodes: context_nodes_list[num],
+        edges: context_edges_list[num]
+      };
+        network.setData(d)
+      }  
+    
+    
     </script>
-  <body>
-</html>
+    
+
+    
+  </body>
+  </html>
