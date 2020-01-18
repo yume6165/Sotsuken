@@ -113,6 +113,8 @@ def sem_projection(sem_mat, sem_contex, data, input_img, contex_vec_list):#data�
 		tmp = tmp.reshape(-1,)#なんか二次元配列になっちゃう問題
 		dis = 0
 		
+		
+		#この下逆じゃない？
 		for w in weigth_c:
 			#print(tmp)
 			#print(w)

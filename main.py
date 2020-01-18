@@ -42,6 +42,19 @@ def flatten(data):
                 yield element
         else:
             yield item
+			
+			
+def no_context_dist(data):#なんの文脈もないときの距離を計算
+	distances = []
+	for d1 in data:
+		dist = []
+		for d2 in data:
+			tmp = np.array(d1) - np.array(d2)
+			dst = np.linalg.norm(tmp)
+			dist.append(dst)
+		distances.append(dist)
+	
+	return distances
 
 def make_semantic_matrix(data_mat):#意味行列を作るためのに作成したセマンティックな行列を入力
 	
@@ -51,7 +64,16 @@ def make_semantic_matrix(data_mat):#意味行列を作るためのに作成し�
 	#print(eig_val)
 	#print(eig_vec)
 	
-	return eig_vec
+	result_sem_mat =[]
+	for vec in eig_vec:
+		if(np.linalg.norm(vec) > 0):
+			#print(vec)
+			result_sem_mat.append(vec)
+	
+	#print("sem")
+	#print(len(result_sem_mat))
+	
+	return result_sem_mat
 	
 
 #文脈の作成
@@ -107,10 +129,10 @@ def make_context(sem_mat, word_list, contex_word, data):#意味行列に文脈�
 		return sem_contex, contex_vec_list
 	
 #意味空間への射影
-def sem_projection(sem_mat, sem_contex, data, input_img, contex_vec_list):#dataはデータベースにある画像、input_imgは今回のメイン画像	
+def sem_projection(sem_mat, sem_contex, data, contex_vec_list):#dataはデータベースにある画像、input_imgは今回のメイン画像	
 	global thresh#閾値以下の距離は0にする処理のための閾値
-	input_vec = np.matrix(input_img) * np.matrix(sem_contex).T
-	data_vec = np.matrix(data) * np.matrix(sem_contex).T
+	#input_vec = np.matrix(input_img) * np.matrix(sem_contex).T
+	#data_vec = np.matrix(data) * np.matrix(sem_contex).T
 	data_dis =[]#入力データと各データとの距離を記録する
 	#print("input:"+str(input_vec))
 	#print("data:"+str(data_vec))
@@ -134,33 +156,70 @@ def sem_projection(sem_mat, sem_contex, data, input_img, contex_vec_list):#data�
 		w = 0
 		for c in contex_vec_list:
 			w += np.dot(np.array(c), np.array(f))
-			#print(w)
 		weigth_c.append(w / np.linalg.norm(div_vec))
 	
+	#print(len(weigth_c))
+	#print(sem_contex)
 	#np.array(input_vec)
 	#print(input_vec)
 	#距離の計算
 	#各（文脈から選抜した）意味素において重みを与えて計算する
-	for d in data_vec.tolist():
-		count = 0
-		tmp = np.array(d) - np.array(input_vec.reshape(-1,))
-		tmp = tmp.reshape(-1,)#なんか二次元配列になっちゃう問題
-		dis = 0
+	#print(data)
+	#print(weigth_c)
+	cxy = []
+	for d in data:
+		tmp_cxy = []
+		tmps = []
+		for d2 in data:
+			tmp = np.array(d) - d2
+			tmps.append(tmp)
+		#print(len(tmps))
 		
-		for w in weigth_c:
-			#print(tmp)
-			#print(w)
-			tmp[count] *= w
-			count += 1
-			
-		for t in tmp:
-			dis += t * t
-		dis = math.sqrt(dis)
+		for tmp in tmps:
+			count = 0
+			num = 0
+			for t in tmp:
+				for w in weigth_c:
+					num += t * w * t * w
 		
-		if(dis < thresh):
-			dis = 0
+			num1 =  math.sqrt(num)
+			tmp_cxy.append(num1)
+	
+		cxy.append(tmp_cxy)
+	
+	print(cxy)
+	
+	#for d in data.tolist():
+	#	count = 0
+	#	tmps = []
+		
+		#print(len(data))
+	#	for i in range(len(data)):
+	#		tmp = np.array(d) - data[i]
+	#		tmps.append(tmp)#なんか二次元配列になっちゃう問題
+		
+	#	dis = 0
+		
+	#	for t in tmps:
+	#		count = 0
+	#		for w in weigth_c:
+				#print(tmp)
+				#print(w)
+	#			tmp[count] *= w
+	#			count += 1
+		
+	#	for i in tmps:
+	#		for t in i:
+	#			dis += t * t
+		
+	
 			
-		data_dis.append(dis)
+	#	dis = math.sqrt(dis)
+		
+	#	if(dis < thresh):
+	#		dis = 0
+	#		
+	#	data_dis.append(dis)
 	
 	#for d in data_vec:
 	#	dis = np.linalg.norm(d - input_vec)
@@ -168,7 +227,8 @@ def sem_projection(sem_mat, sem_contex, data, input_img, contex_vec_list):#data�
 		#print(str(count) + " : " + str(dis))
 		#count += 1
 		
-	return data_dis
+	#print(data_dis)
+	return cxy
 
 
 
@@ -1401,6 +1461,10 @@ def judge(id, img):
 	cv.imwrite(path2, edge_img)
 	cv.imwrite(path3, color_hist_img)
 	
+	#今後書き直す
+	if(edge_straight == 1):
+		edge_irregular = 0
+	
 	result = [end_sharp,end_thick,edge_irregular,edge_straight,oval,openness,non_openness]
 	
 	#色情報と合成
@@ -1434,7 +1498,7 @@ def read_img(folder):#フォルダを指定して
 	with open('D:\\Sotsuken\\Sotsuken_repo\\result\\output_file\\img_infos.csv', 'w') as f:
 		writer = csv.DictWriter(f, ['original_img', 'edge_img', 'color_hist_img', 'color'])
 		#ヘッダの書き込み
-		#writer.writeheader()
+		writer.writeheader()
 		
 		for data in data_list:
 			#print(data)
@@ -1455,16 +1519,16 @@ def mmm_operation(path):
 	#print(data_list)
 	
 	#word_listに色追加しなくちゃいけない、、、。
-	#word_list = ["end_sharp","end_thick","edge_irregular","edge_straight","oval","openness","non_openness"]
+	word_list = ["end_sharp","end_thick","edge_irregular","edge_straight","oval","openness","non_openness"]
 	sem_mat = make_semantic_matrix(results)
 	#sem_data = cl.OrderedDict()
 	
 	#意味空間をｃｓｖで出力
-	#with open('D:\\Sotsuken\\Sotsuken_repo\\result\\output_file\\sem_mat.csv', 'w') as f:
-	#	writer = csv.writer(f)
+	with open('D:\\Sotsuken\\Sotsuken_repo\\result\\output_file\\sem_mat.csv', 'w') as f:
+		writer = csv.writer(f)
 		#writer.writerow(word_list)
-	#	for row in sem_mat:
-	#		writer.writerow(row)
+		for row in sem_mat:
+			writer.writerow(row)
 	
 	#まずすべての文脈において距離計算
 	word_list = ["end_sharp","end_thick","edge_irregular","edge_straight","oval","openness","non_openness","color"]
@@ -1489,18 +1553,21 @@ def mmm_operation(path):
 		
 		sem_contex, contex_vec_list = make_context(sem_mat, word_list, contex_word, results)
 		
-		for img_vec in results:#画像毎にdataとの距離計算
-			#print(img_vec)
-			distances = sem_projection(sem_mat, sem_contex, results, img_vec, contex_vec_list)
-			distances_list.append(distances)
+		#for img_vec in results:#画像毎にdataとの距離計算
+		#print(img_vec)
+		distances = sem_projection(sem_mat, sem_contex, results, contex_vec_list)
+		distances_list.append(distances)
 			
 		with open('D:\\Sotsuken\\Sotsuken_repo\\result\\output_file\\context_dist\\'+str(count)+'_'+c_list[count]+'_context.csv', 'w') as f:
 			writer = csv.writer(f)
 			for distances in distances_list:
 				writer.writerow(distances)
-			
 		count += 1
-			
+
+		
+	with open('D:\\Sotsuken\\Sotsuken_repo\\result\\output_file\\context_dist\\no_context.csv', 'w') as f:
+		writer = csv.writer(f)
+		writer.writerow(no_context_dist(results))	
 		
 		
 	#文脈毎にcsvで出力

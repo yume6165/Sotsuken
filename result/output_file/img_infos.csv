@@ -1,7 +1,5 @@
-https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2Fori_img_0.jpg?v=1576330886612,https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2Fedge_img_0.jpg?v=1576330869546,https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2Fcolor_hist_img_0.jpg?v=1576330851965,"['pale_5R', 'pale_10R', 'pale_10Y', 'pale_10YR', 'pale_5Y', 'pale_5YR']"
-,,,
-https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2Fori_img_1.jpg?v=1576330887100,https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2Fedge_img_1.jpg?v=1576330869800,https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2Fcolor_hist_img_1.jpg?v=1576330854668,"['dark_5B', 'dark_10R', 'dark_5R']"
-,,,
-https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2Fori_img_2.jpg?v=1576330890015,https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2Fedge_img_2.jpg?v=1576330870323,https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2Fcolor_hist_img_2.jpg?v=1576330854669,"['graylsh_10RP', 'graylsh_5R']"
-,,,
-https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2Fori_img_3.jpg?v=1576330888116,https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2Fedge_img_3.jpg?v=1576330863007,https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2Fcolor_hist_img_3.jpg?v=1576330857861,"['graylsh_10R', 'graylsh_5R']"
+original_img,edge_img,color_hist_img,color
+D:\Sotsuken\Sotsuken_repo\result\original_img\ori_img_0.jpg,D:\Sotsuken\Sotsuken_repo\result\edge_img\edge_img_0.jpg,D:\Sotsuken\Sotsuken_repo\result\color_hist_img\color_hist_img_0.jpg,"['pale_5Y', 'pale_5YR', 'pale_10YR', 'pale_10R', 'pale_5R', 'pale_10Y']"
+D:\Sotsuken\Sotsuken_repo\result\original_img\ori_img_1.jpg,D:\Sotsuken\Sotsuken_repo\result\edge_img\edge_img_1.jpg,D:\Sotsuken\Sotsuken_repo\result\color_hist_img\color_hist_img_1.jpg,"['dark_5R', 'dark_5B', 'dark_10R']"
+D:\Sotsuken\Sotsuken_repo\result\original_img\ori_img_2.jpg,D:\Sotsuken\Sotsuken_repo\result\edge_img\edge_img_2.jpg,D:\Sotsuken\Sotsuken_repo\result\color_hist_img\color_hist_img_2.jpg,"['graylsh_5R', 'graylsh_10RP']"
+D:\Sotsuken\Sotsuken_repo\result\original_img\ori_img_3.jpg,D:\Sotsuken\Sotsuken_repo\result\edge_img\edge_img_3.jpg,D:\Sotsuken\Sotsuken_repo\result\color_hist_img\color_hist_img_3.jpg,"['graylsh_10R', 'graylsh_5R']"
