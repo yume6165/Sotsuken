@@ -1,5 +1,5 @@
 original_img,edge_img,color_hist_img,color
-D:\Sotsuken\Sotsuken_repo\result\original_img\ori_img_0.jpg,D:\Sotsuken\Sotsuken_repo\result\edge_img\edge_img_0.jpg,D:\Sotsuken\Sotsuken_repo\result\color_hist_img\color_hist_img_0.jpg,"['pale_5Y', 'pale_5YR', 'pale_10YR', 'pale_10R', 'pale_5R', 'pale_10Y']"
+D:\Sotsuken\Sotsuken_repo\result\original_img\ori_img_0.jpg,D:\Sotsuken\Sotsuken_repo\result\edge_img\edge_img_0.jpg,D:\Sotsuken\Sotsuken_repo\result\color_hist_img\color_hist_img_0.jpg,"['pale_10R', 'pale_5YR', 'pale_10Y', 'pale_10YR', 'pale_5Y', 'pale_5R']"
 D:\Sotsuken\Sotsuken_repo\result\original_img\ori_img_1.jpg,D:\Sotsuken\Sotsuken_repo\result\edge_img\edge_img_1.jpg,D:\Sotsuken\Sotsuken_repo\result\color_hist_img\color_hist_img_1.jpg,"['dark_5R', 'dark_5B', 'dark_10R']"
-D:\Sotsuken\Sotsuken_repo\result\original_img\ori_img_2.jpg,D:\Sotsuken\Sotsuken_repo\result\edge_img\edge_img_2.jpg,D:\Sotsuken\Sotsuken_repo\result\color_hist_img\color_hist_img_2.jpg,"['graylsh_5R', 'graylsh_10RP']"
+D:\Sotsuken\Sotsuken_repo\result\original_img\ori_img_2.jpg,D:\Sotsuken\Sotsuken_repo\result\edge_img\edge_img_2.jpg,D:\Sotsuken\Sotsuken_repo\result\color_hist_img\color_hist_img_2.jpg,"['graylsh_10RP', 'graylsh_5R']"
 D:\Sotsuken\Sotsuken_repo\result\original_img\ori_img_3.jpg,D:\Sotsuken\Sotsuken_repo\result\edge_img\edge_img_3.jpg,D:\Sotsuken\Sotsuken_repo\result\color_hist_img\color_hist_img_3.jpg,"['graylsh_10R', 'graylsh_5R']"

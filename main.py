@@ -8,6 +8,7 @@ import numpy as np
 np.set_printoptions(threshold=np.inf)
 import pandas as pd
 import math
+import cmath
 import matplotlib.pyplot as plt
 import glob
 from statistics import mean, stdev
@@ -54,6 +55,7 @@ def no_context_dist(data):#なんの文脈もないときの距離を計算
 			dist.append(dst)
 		distances.append(dist)
 	
+	#print(distances)
 	return distances
 
 def make_semantic_matrix(data_mat):#意味行列を作るためのに作成したセマンティックな行列を入力
@@ -64,16 +66,20 @@ def make_semantic_matrix(data_mat):#意味行列を作るためのに作成し�
 	#print(eig_val)
 	#print(eig_vec)
 	
-	result_sem_mat =[]
-	for vec in eig_vec:
-		if(np.linalg.norm(vec) > 0):
-			#print(vec)
-			result_sem_mat.append(vec)
+	U,_ = np.linalg.qr(eig_vec)
+	
+	#print(len(U))
+	
+	#result_sem_mat =[]
+	#for vec in eig_vec:
+	#	if(np.linalg.norm(vec) > 0):
+	#		#print(vec)
+	#		result_sem_mat.append(vec)
 	
 	#print("sem")
 	#print(len(result_sem_mat))
 	
-	return result_sem_mat
+	return U
 	
 
 #文脈の作成
@@ -155,6 +161,7 @@ def sem_projection(sem_mat, sem_contex, data, contex_vec_list):#dataはデータ
 	for f in sem_contex:
 		w = 0
 		for c in contex_vec_list:
+			#print(c)
 			w += np.dot(np.array(c), np.array(f))
 		weigth_c.append(w / np.linalg.norm(div_vec))
 	
@@ -180,14 +187,15 @@ def sem_projection(sem_mat, sem_contex, data, contex_vec_list):#dataはデータ
 			num = 0
 			for t in tmp:
 				for w in weigth_c:
-					num += t * w * t * w
-		
-			num1 =  math.sqrt(num)
+					num += (t * w) ** 2
+			
+			#print(num)
+			num1 =  abs(cmath.sqrt(num))
 			tmp_cxy.append(num1)
 	
 		cxy.append(tmp_cxy)
 	
-	print(cxy)
+	#print(cxy)
 	
 	#for d in data.tolist():
 	#	count = 0
@@ -233,7 +241,7 @@ def sem_projection(sem_mat, sem_contex, data, contex_vec_list):#dataはデータ
 
 
 
-#
+
 #
 #画像処理
 #
@@ -1536,11 +1544,9 @@ def mmm_operation(path):
 	
 	#文脈の種類を作成
 	contex_list = []
-	c_list = ["all","incision", "contusion"]#文脈の順番を格納
-	all_contex = contex_word
+	c_list = ["incision", "contusion"]#文脈の順番を格納
 	incision_contex = ["end_sharp", "edge_straight", "openness"]
 	contusion_contex = ["end_thick","edge_irregular","oval","non_openness","color"]
-	contex_list.append(all_contex)
 	contex_list.append(incision_contex)
 	contex_list.append(contusion_contex)
 	
@@ -1556,18 +1562,22 @@ def mmm_operation(path):
 		#for img_vec in results:#画像毎にdataとの距離計算
 		#print(img_vec)
 		distances = sem_projection(sem_mat, sem_contex, results, contex_vec_list)
-		distances_list.append(distances)
-			
-		with open('D:\\Sotsuken\\Sotsuken_repo\\result\\output_file\\context_dist\\'+str(count)+'_'+c_list[count]+'_context.csv', 'w') as f:
+		#distances_list.append(distances)
+		
+		print(distances)
+		
+		with open('D:\\Sotsuken\\Sotsuken_repo\\result\\output_file\\context_dist\\'+str(count + 1)+'_'+c_list[count]+'_context.csv', 'w') as f:
 			writer = csv.writer(f)
-			for distances in distances_list:
-				writer.writerow(distances)
+			for d in distances:
+				writer.writerow(d)
 		count += 1
 
 		
-	with open('D:\\Sotsuken\\Sotsuken_repo\\result\\output_file\\context_dist\\no_context.csv', 'w') as f:
+	with open('D:\\Sotsuken\\Sotsuken_repo\\result\\output_file\\context_dist\\0_no_context.csv', 'w') as f:
 		writer = csv.writer(f)
-		writer.writerow(no_context_dist(results))	
+		#writer.writerow(no_context_dist(results))	
+		for d in no_context_dist(results):
+				writer.writerow(d)
 		
 		
 	#文脈毎にcsvで出力
