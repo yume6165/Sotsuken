@@ -90,7 +90,7 @@ def make_context(sem_mat, word_list, contex_word, data):#意味行列に文脈�
 	
 	#相関行列(データ行列では列が画像行が単語なので代わりに相関行列を利用)
 	relation_mat = np.dot(np.array(data).T, np.array(data))
-	relation_mat[7]
+	#relation_mat[7]
 	for word in contex_word:#文脈として選んだ言葉のみ抽出
 		if(word == "color"):#文脈として色を選んだ場合
 			for i in range(100):
@@ -109,7 +109,7 @@ def make_context(sem_mat, word_list, contex_word, data):#意味行列に文脈�
 	
 	#重心の計算
 	#print(len(word_list))
-	contex_mat = [0] * 107
+	contex_mat = [0] * 6
 	
 	for c in c_hat:
 		#print(contex_mat)
@@ -157,13 +157,17 @@ def sem_projection(sem_mat, sem_contex, data, contex_vec_list):#dataはデータ
 	#すべての文脈語と意味素の内積和をすべての意味素における、すべての文脈語と意味素との内積の和を並べてベクトル化したモノのノルムで割る
 	weigth_c = []#各意味素における重みを入れておく箱
 	#print(sem_contex)
-	
+	#print(contex_vec_list)
 	for f in sem_contex:
 		w = 0
 		for c in contex_vec_list:
 			#print(c)
 			w += np.dot(np.array(c), np.array(f))
-		weigth_c.append(w / np.linalg.norm(div_vec))
+		if(w < 0):#0以下の重みは０に
+			w = 0
+		weigth_c.append(w / max(div_vec))
+	
+	print(weigth_c)
 	
 	#print(len(weigth_c))
 	#print(sem_contex)
@@ -187,6 +191,7 @@ def sem_projection(sem_mat, sem_contex, data, contex_vec_list):#dataはデータ
 			num = 0
 			for t in tmp:
 				for w in weigth_c:
+					#print(w)
 					num += (t * w) ** 2
 			
 			#print(num)
@@ -757,7 +762,7 @@ def edge_judge(img):#創縁不整と創縁直線を判定
 		size, distance, short_axi, edge_side1, edge_side2, flag = detect_edge(img)
 		
 		if(flag == "non_openness"):#非開放性の時
-			return 1, 0
+			return 1, -1
 		
 		edge_irregular = 0
 		edge_straight = 0
@@ -782,10 +787,12 @@ def edge_judge(img):#創縁不整と創縁直線を判定
 		#創縁不整,直線を定義
 		if(cv1 < 0.1 and cv2 < 0.1):
 			edge_straight = 1
+			edge_irregular = -1
 		elif(cv1 >= 0.1 and cv2 >= -0.1):
+			edge_straight = -1
 			edge_irregular = 1
 		else:
-			edge_straight = 1
+			edge_straight = 0
 			edge_irregular = 1
 		#print("cv : "+ str(cv))
 		
@@ -796,7 +803,7 @@ def sharp_judge(img):
 	size, distance, short_axi, e1, e2, flag = detect_edge(img)
 	
 	if(flag == "non_openness"):#非開放性の時
-		return 0 ,0, 0, 1
+		return 0 ,0, -1
 	
 	
 	
@@ -839,16 +846,16 @@ def sharp_judge(img):
 	#plt.show()
 	
 	if(fw_result < 0.5 and bw_result < 0.5):#どちらの端も0.5未満なら創端鋭利
-		return 1, 0, 1, 0
+		return 1, 0, 1
 		
 	elif(fw_result >= 0.5 and bw_result >= 0.5):#どちらの端も0.5未満なら創端太
-		return 0, 1, 1, 0
+		return 0, 1, 1
 		
 	elif((fw_result < 0.5 or bw_result < 0.5) and (fw_result >= 0.5 and bw_result >= 0.5)):#どちらかの端点が太く、もう一方が鋭利
-		return 1, 1, 1, 0
+		return 1, 1, 1
 		
 	else:
-		return 0, 0, 1, 0
+		return 0, 0, 1
 		
 
 def contrast(image, a):#(aはゲイン)
@@ -1054,7 +1061,7 @@ def toLab(img):
 			color_list.append(deg[1] +"_10G")
 		
 	
-	print(list(set(color_list)))
+	#print(list(set(color_list)))
 	
 	#img = cv.imread(hist)
 	#cv.imshow()
@@ -1443,7 +1450,7 @@ def judge(id, img):
 	edge_img = edge_detection(img)
 	
 	#創傷端を判定
-	end_sharp, end_thick, openness, non_openness = sharp_judge(img)
+	end_sharp, end_thick, openness = sharp_judge(img)
 	
 	#創傷縁を判定
 	edge_irregular, edge_straight = edge_judge(img)
@@ -1473,20 +1480,15 @@ def judge(id, img):
 	if(edge_straight == 1):
 		edge_irregular = 0
 	
-	a = [end_sharp,end_thick,edge_irregular,edge_straight,oval,openness,non_openness]
+	
+	#01で特徴を示す場合
+	result = [end_sharp,end_thick,edge_irregular,edge_straight,oval,openness,non_openness]
+	#特徴ベクトルを正規化する場
+		
+	#print(result)
 	
 	#色情報と合成
-	a.extend(palette)
-	
-	result = []
-	#特徴ベクトルを正規化する場合
-	s = 0
-	for r in a:
-		s += r
-	for r in a:
-		ans = 0
-		ans = r / s
-		result.append(ans)
+	#result.extend(palette)
 	
 	#辞書作成
 	data = {'original_img' : path1, 'edge_img':path2,
@@ -1537,7 +1539,8 @@ def mmm_operation(path):
 	#print(data_list)
 	
 	#word_listに色追加しなくちゃいけない、、、。
-	word_list = ["end_sharp","end_thick","edge_irregular","edge_straight","oval","openness","non_openness"]
+	word_list = ["end_sharp","end_thick","edge_irregular","edge_straight","oval","openness"]
+	#data_mat = np.array(results)
 	sem_mat = make_semantic_matrix(results)
 	#sem_data = cl.OrderedDict()
 	
@@ -1549,34 +1552,34 @@ def mmm_operation(path):
 			writer.writerow(row)
 	
 	#まずすべての文脈において距離計算
-	word_list = ["end_sharp","end_thick","edge_irregular","edge_straight","oval","openness","non_openness","color"]
-	contex_word = ["end_sharp","end_thick","edge_irregular","edge_straight","oval","openness","non_openness","color"]
+	word_list = ["end_sharp","end_thick","edge_irregular","edge_straight","oval","openness"]
+	contex_word = [["end_sharp","end_thick","edge_irregular","edge_straight","oval","openness"]]
 	
 	#文脈の種類を作成
 	contex_list = []
 	c_list = ["incision", "contusion", "all"]#文脈の順番を格納
 	incision_contex = ["end_sharp", "edge_straight", "openness"]
-	contusion_contex = ["end_thick","edge_irregular","oval","non_openness","color"]
-	all_contex = word_list
+	contusion_contex = ["edge_irregular","openness"]
+	all_context = word_list
 	contex_list.append(incision_contex)
 	contex_list.append(contusion_contex)
-	contex_list.append(all_contex)
+	contex_list.append(all_context)
 	
-	sem_contex, contex_vec_list = make_context(sem_mat, word_list, contex_word, results)
+	sem_contex, contex_vec_list = make_context(sem_mat, word_list, contex_word, data_mat)
 	
 	count = 0
 	for contex_word in contex_list:#全てのコンテクストについて距離を計算しdistance_listに格納
 		distances_list = []
 		distances = []#各画像から画像までの距離
 		
-		sem_contex, contex_vec_list = make_context(sem_mat, word_list, contex_word, results)
+		sem_contex, contex_vec_list = make_context(sem_mat, word_list, contex_word, data_mat)
 		
 		#for img_vec in results:#画像毎にdataとの距離計算
 		#print(img_vec)
 		distances = sem_projection(sem_mat, sem_contex, results, contex_vec_list)
 		#distances_list.append(distances)
 		
-		print(distances)
+		#print(distances)
 		
 		with open('D:\\Sotsuken\\Sotsuken_repo\\result\\output_file\\context_dist\\'+str(count + 1)+'_'+c_list[count]+'_context.csv', 'w') as f:
 			writer = csv.writer(f)
