@@ -15,6 +15,7 @@ from statistics import mean, stdev
 import seaborn as sns
 import csv
 import collections as cl
+import copy
 
 #研究室で研究するとき
 #path = "./sample/incision_1.jpg"

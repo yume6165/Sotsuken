@@ -15,6 +15,7 @@ from statistics import mean, stdev
 import seaborn as sns
 import csv
 import collections as cl
+import copy
 
 #研究室で研究するとき
 #path = "./sample/incision_1.jpg"
@@ -1473,20 +1474,11 @@ def judge(id, img):
 	if(edge_straight == 1):
 		edge_irregular = 0
 	
-	a = [end_sharp,end_thick,edge_irregular,edge_straight,oval,openness,non_openness]
+	result = [end_sharp,end_thick,edge_irregular,edge_straight,oval,openness,non_openness]
 	
 	#色情報と合成
-	a.extend(palette)
+	result.extend(palette)
 	
-	result = []
-	#特徴ベクトルを正規化する場合
-	s = 0
-	for r in a:
-		s += r
-	for r in a:
-		ans = 0
-		ans = r / s
-		result.append(ans)
 	
 	#辞書作成
 	data = {'original_img' : path1, 'edge_img':path2,

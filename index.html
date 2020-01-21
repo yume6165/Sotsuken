@@ -12,9 +12,11 @@
   
   </head>
   <body>
-    <h1>THEMIS</h1>
-    <p id="subtitle">-THeoretical Estimation of Meaning of InSult-</p>
-
+    <div class="title_space">
+    <p id="title">THEMIS -THeoretical Estimation of Meaning of InSult-</p>
+    </div>
+      
+    <div class="inline_box">
     <div id="select_context">
     <form name="select_context">
     <select name="select_context">
@@ -22,30 +24,35 @@
     <option value="1">Incision</option>
     <option value="2">Contusion</option>
     </select>
-      
+    </form>
     <button type="button" name="select_context" onclick="app_context()">
     <font size="1">適用</font>
     </button>
-    </form>
+    
     </div>
     <!--棒グラフ表示-->
     <canvas id="stage" style="position:relative;　height:40vh; width:80vw"></canvas>
-
+    </div>
     
     <!--ネットワーク表示-->
+    <div class="inline_box">
     <div id="network"></div>
     <div id="mater">
       Color_mater
     </div>
+    </div>
     
     <!--創傷の情報表示-->
+    <div class="inline_box">
     <div id="wound_feild">
       <div id="wound_img_name">
+        <div class="name_box"><p id="wound_name">Wound Name</p></div>
         <image id="wound_ori_img" title="wound" src="https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2Fnone_icon.svg?v=1576918386493" height="100"></image>
         <image id="wound_edge_img" title="wound_edge" src="https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2Fnone_icon.svg?v=1576918386493" height="100"></image>
-        <p id="wound_name">Wound Name</p>
+
       </div>
       
+      <div class="inline_box">
       <div id="wound_figure">
         <form name="wound_figure">
         <input type="image" id="close_icon" title="close" src="https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2Fclose_icon.svg?v=1576909771220" height="35" width="35">
@@ -60,14 +67,38 @@
           <!--<input type="image" id="contusion_bruise_icon" title="contusion_bruise" src="https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2Fcontusion_bruise.svg?v=1576909771874" height="35" width="35">-->
         </form>
       </div>
+      </div>
       
+      <div class="inline_box">
       <div id="wound_color">
-        <image id="wound_color_map" title="wound_color_map" src="https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2Fnone_icon.svg?v=1576918386493" height="140" width="140"></image>
+        <image id="wound_color_map" title="wound_color_map" src="https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2Fnone_icon.svg?v=1576918386493" height="160" width="160"></image>
+      </div>
       </div>
       
     </div>
+    </div>
     
-    <script type="text/javascript">
+    <div id="timeline"></div>
+    
+<script type="text/javascript">
+
+//Timelineに関する記述
+var container = document.getElementById("timeline");
+
+// Create a DataSet (allows two way data-binding)
+var items = new vis.DataSet([
+  { id: 1, content: "now", start: "2014-04-20" }
+
+]);
+
+// Configuration for the Timeline
+var options = {};
+
+// Create a Timeline
+var timeline = new vis.Timeline(container, items, options);
+
+
+      
 function define_edge_color(w, max, min)
       {
         def = max - min;
@@ -208,12 +239,13 @@ function csvToArray(path) {
       //類似度を入力
       distance = [];
       distances = [];
-      distance.push(csvToArray("https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2F0_all_context.csv?v=1576165789415"));
-      distances.push(distance);
-      distance.push(csvToArray("https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2F1_incision_context.csv?v=1576165789283"));
-      distances.push(distance);
-      distance.push(csvToArray("https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2F2_contusion_context.csv?v=1576165789447"));
-      distances.push(distance);
+      distances.push(csvToArray("https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2F3_all_context.csv?v=1579457227508"));
+      //distances.push(distance);
+      distances.push(csvToArray("https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2F1_incision_context.csv?v=1579457227532"));
+      //distances.push(distance);
+      distances.push(csvToArray("https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2F2_contusion_context.csv?v=1579457228250"));
+      //distances.push(distance);
+      console.log(distances)
       
       
       //画像データを読み込み
@@ -230,12 +262,12 @@ function csvToArray(path) {
       
       //画像のベクトルを読み込み
       img_vec = [];
-      img_vec.push(csvToArray("https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2Fimg_vec.csv?v=1576830518437"));
+      img_vec.push(csvToArray("https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2Fimg_vec.csv?v=1579577810369"));
       //console.log(img_vec[0]);
       
       //console.log(distances);
       c_num = distances.length;
-      i_num = distance[0].length;
+      i_num = distances[0].length;
       
       
       
@@ -265,12 +297,12 @@ function csvToArray(path) {
           for(var j = 0; j < i_num ; j++)
           {
             //console.log(distances[0][k][i][j])
-            if(parseFloat(distances[0][k][i][j]) == 0)
+            if(parseFloat(distances[k][i][j]) == 0)
             {
               w_context_list.push(0);
               continue;
             }
-            w_context_list.push(1/(parseFloat(distances[0][k][i][j])));
+            w_context_list.push(1/(parseFloat(distances[k][i][j])));
            //console.log(w_list);
           }
         }
@@ -417,7 +449,7 @@ function sort_data(w, index, context)
         {
           for(var j = i+1; j < i_num ; j++)
           {
-            w = Number(distances[0][k][i][j]);
+            w = Number(distances[k][i][j]);
             //console.log(distances[0][k][i][j]);
             var w_tmp = 1 / w;
             w = 3 / w;
@@ -437,7 +469,7 @@ function sort_data(w, index, context)
           //  rgb.push(b);
           //  c = RGB2Hex(rgb);
             
-            var a = {from: i, to: j, width:w, color:{color:c}};
+            var a = {from: i, to: j, width:w, color:{highlight:c , color:c}};
             edge_list.push(a);
           }
         }
@@ -459,7 +491,7 @@ function sort_data(w, index, context)
         nodes: {
           shape: "dot",
           size: 10,
-        borderWidth: 1
+        borderWidth: 1,
       }, 
         
          edges: {
@@ -477,20 +509,9 @@ function sort_data(w, index, context)
         if (params.nodes.length == 1) {
           var nodeId = params.nodes[0];
           var node = nodes.get(nodeId);
-          var option_select = {
-        
-          nodes: {
-                    shape: "dot",
-                    size: 10,
-                    borderWidth: 2
-                  }, 
-          edges: {
-                   smooth: true,
-                 //shadow: true,
-                 }
-      
-          };
-          network.setOptions(option_select);
+          //var option_select = {};
+          nodes.update([{id: 1, color: {background: '#ffffff'}}]); 
+          //network.setOptions(option_select);
           console.log(node.label + 'がクリックされました');
           
           
@@ -502,6 +523,10 @@ function sort_data(w, index, context)
           wound_ori_img.src = img_info[0][nodeId][0];
           wound_edge_img.src = img_info[0][nodeId][1];
           wound_color_map.src = img_info[0][nodeId][2];
+          
+          //画像の名前適用
+          var wound_name = document.getElementById("wound_name");
+          wound_name.innerHTML = "Wound_"+ String(nodeId);
           
           //iconの透過度を変更
           //console.log(img_vec[0][nodeId]);
@@ -522,6 +547,7 @@ function sort_data(w, index, context)
           end_thick_icon.style.opacity = 0.3;
           edge_straight_icon.style.opacity = 0.3;
           oval_icon.style.opacity = 0.3;
+          edge_irregular_icon.style.opacity = 0.3;
           
           if(img_vec[0][nodeId][0] == "1")
             end_sharp_icon.style.opacity = 1.0;
@@ -550,20 +576,227 @@ function sort_data(w, index, context)
               
            
         }
+        
+        var context = document.select_context.select_context;
+        var num = context.selectedIndex;
+        //console.log(context);
+        var num2 = Number(context.options[num].value);
+        //console.log(num2);
+        
+        //棒グラフの更新
+        var a = Math.sqrt(w_list[num2].length);//データの数
+        var tmp = w_list[num2];
+        //console.log(tmp);
+        tmp1 = tmp.slice(nodeId * a, nodeId * a + a);
+        //console.log(tmp1);
+        tmp = tmp1.sort(
+                        function(a,b) {
+                        // 戻り値が正（b-aの差が正）のとき、aをbの前に並べ替え
+                        // 戻り値が負（b-aの差が負）のとき、aをbの後ろ並べ替え
+                        return b - a;
+                      }
+                      );
+        //console.log(tmp);
+        //console.log(w[0][context]);
+        var result_labels = [];
+        for(var i=0; i < a ; i++)
+        {
+          if(i == nodeId)
+            continue;
+          //console.log(tmp1.indexOf(tmp[i]));
+          var num3 = (tmp1.indexOf(tmp[i]));
+          var name = "Wound_" + String(num3);
+          result_labels.push(name);
+        }
+        //console.log(result_labels);
+        var max = Math.max.apply(null, tmp);
+        var result =[];
+        result.push(result_labels);
+        result.push(tmp);
+        result.push(max);
+        //console.log(tmp);
+        
+        var labels = [];
+        var data = [];
+        var sort = result;//初期値は0
+        //console.log(sort);
+        var stage = document.getElementById('stage').getContext("2d");
+        myBar.destroy();
+        myBar = new Chart(stage,{
+          type: 'horizontalBar',
+          data:{
+            labels:sort[0],
+            datasets:[{
+              data:sort[1],
+              backgroundColor:['#FF4444', '#4444FF', '#44BB44', '#FFFF44', '#FF44FF']
+            }]
+          },
+           options: {                             //◆オプション
+              responsive: true,                  //グラフ自動設定
+              legend: {                          //凡例設定
+                  display: false                 //表示設定
+             },
+              title: {                           //タイトル設定
+                  display: false,                 //表示設定
+                  fontSize: 18,                  //フォントサイズ
+                  text: 'タイトル'                //ラベル
+              },
+              scales: {                          //軸設定
+                  yAxes: [{                      //y軸設定
+                      display: true,             //表示設定
+                      barPercentage: 0.4,           //棒グラフ幅
+                      categoryPercentage: 0.4,
+                      scaleLabel: {              //軸ラベル設定
+                         display: false,          //表示設定
+                         labelString: '創傷',  //ラベル
+                         fontSize: 11               //フォントサイズ
+                      },
+                      ticks: {                      //最大値最小値設定
+                          min: 0,                   //最小値
+                          max: sort_data[2],                  //最大値
+                          fontSize: 11,             //フォントサイズ
+                          stepSize: 5               //軸間隔
+                      },
+                  }],
+                  xAxes: [{                         //x軸設定
+                      display: true,                //表示設定
+                      barPercentage: 0.2,           //棒グラフ幅
+                      categoryPercentage: 0.2,      //棒グラフ幅
+                      scaleLabel: {                 //軸ラベル設定
+                         display: true,             //表示設定
+                         labelString: '類似度',  //ラベル
+                         fontSize: 11               //フォントサイズ
+                      },
+                      ticks: {
+                          fontSize: 11             //フォントサイズ
+                      },
+                  }],
+              },
+              layout: {                             //レイアウト
+                  padding: {                          //余白設定
+                      left: 50,
+                      right: 100,
+                      top: 0,
+                      bottom: 0
+                  }
+              }
+          }
+      });
+        
       });
       
     function app_context()//文脈を読み込んで表示
       {
         //console.log("app_contextが押されました");
+      
+        
         var context = document.select_context.select_context;
-        var num = Number(context.selectedIndex.value);
-        console.log(num);
+        var num = context.selectedIndex;
+        //console.log(context);
+        var num2 = Number(context.options[num].value);
+        //console.log(num2);
         var d = {
-        nodes: context_nodes_list[num],
-        edges: context_edges_list[num]
+        nodes: context_nodes_list[num2],
+        edges: context_edges_list[num2]
       };
-        network.setData(d)
-      }  
+        network = new vis.Network(container, d, options);
+        
+        //棒グラフの更新
+        var a = Math.sqrt(w_list[num2].length);//データの数
+        var tmp = w_list[num2];
+       // console.log(w);
+        tmp = tmp.slice(0 * a, 0 * a + a);
+        tmp = tmp.sort(
+                        function(a,b) {
+                        // 戻り値が正（b-aの差が正）のとき、aをbの前に並べ替え
+                        // 戻り値が負（b-aの差が負）のとき、aをbの後ろ並べ替え
+                        return b - a;
+                      }
+                      );
+
+        //console.log(w[0][context]);
+        var result_labels = [];
+        for(var i=0; i < a - 1; i++)
+        {
+          var num3 = w_list[num2].indexOf(tmp[i]);
+          var name = "Wound_" + String(num3);
+          result_labels.push(name);
+        }
+        //console.log(result_labels);
+        var max = Math.max.apply(null, tmp);
+        var result =[];
+        result.push(result_labels);
+        result.push(tmp);
+        result.push(max);
+        //console.log(tmp);
+        
+        var labels = [];
+        var data = [];
+        var sort = result;//初期値は0
+        //console.log(sort);
+        var stage = document.getElementById('stage').getContext("2d");
+        myBar.destroy();
+        myBar = new Chart(stage,{
+          type: 'horizontalBar',
+          data:{
+            labels:sort[0],
+            datasets:[{
+              data:sort[1],
+              backgroundColor:['#FF4444', '#4444FF', '#44BB44', '#FFFF44', '#FF44FF']
+            }]
+          },
+           options: {                             //◆オプション
+              responsive: true,                  //グラフ自動設定
+              legend: {                          //凡例設定
+                  display: false                 //表示設定
+             },
+              title: {                           //タイトル設定
+                  display: false,                 //表示設定
+                  fontSize: 18,                  //フォントサイズ
+                  text: 'タイトル'                //ラベル
+              },
+              scales: {                          //軸設定
+                  yAxes: [{                      //y軸設定
+                      display: true,             //表示設定
+                      barPercentage: 0.4,           //棒グラフ幅
+                      categoryPercentage: 0.4,
+                      scaleLabel: {              //軸ラベル設定
+                         display: false,          //表示設定
+                         labelString: '創傷',  //ラベル
+                         fontSize: 11               //フォントサイズ
+                      },
+                      ticks: {                      //最大値最小値設定
+                          min: 0,                   //最小値
+                          max: sort_data[2],                  //最大値
+                          fontSize: 11,             //フォントサイズ
+                          stepSize: 5               //軸間隔
+                      },
+                  }],
+                  xAxes: [{                         //x軸設定
+                      display: true,                //表示設定
+                      barPercentage: 0.2,           //棒グラフ幅
+                      categoryPercentage: 0.2,      //棒グラフ幅
+                      scaleLabel: {                 //軸ラベル設定
+                         display: true,             //表示設定
+                         labelString: '類似度',  //ラベル
+                         fontSize: 11               //フォントサイズ
+                      },
+                      ticks: {
+                          fontSize: 11             //フォントサイズ
+                      },
+                  }],
+              },
+              layout: {                             //レイアウト
+                  padding: {                          //余白設定
+                      left: 50,
+                      right: 100,
+                      top: 0,
+                      bottom: 0
+                  }
+              }
+          }
+      });
+        }  
     
     
     </script>

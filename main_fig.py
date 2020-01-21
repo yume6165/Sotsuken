@@ -15,6 +15,7 @@ from statistics import mean, stdev
 import seaborn as sns
 import csv
 import collections as cl
+import copy
 
 #研究室で研究するとき
 #path = "./sample/incision_1.jpg"
@@ -1605,6 +1606,9 @@ def mmm_operation(path):
 	
 	#word_listに色追加しなくちゃいけない、、、。
 	word_list = ["end_sharp","end_thick","edge_irregular","edge_straight","oval","openness"]
+	#tmp_results = copy.copy(results)
+	#del tmp_results[0]
+	#print(tmp_results)
 	sem_mat = make_semantic_matrix(results)
 	#sem_data = cl.OrderedDict()
 	
