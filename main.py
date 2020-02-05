@@ -1567,31 +1567,31 @@ def mmm_operation(path):
 			writer.writerow(row)
 	
 	#まずすべての文脈において距離計算
-	word_list = ["end_sharp","end_thick","edge_irregular","edge_straight","oval","openness","non_openness","color"]
-	contex_word = ["end_sharp","end_thick","edge_irregular","edge_straight","oval","openness","non_openness","color"]
+	word_list = ["end_sharp","end_thick","edge_irregular","edge_straight","oval","openness","non_openness"]
+	contex_word = [["end_sharp","end_thick","edge_irregular","edge_straight","oval","openness","non_openness"]]
 	
 	#文脈の種類を作成
 	contex_list = []
 	c_list = ["incision", "contusion", "all"]#文脈の順番を格納
-	incision_contex = ["end_sharp", "edge_straight", "openness"]
-	contusion_contex = ["end_thick","edge_irregular","oval","non_openness","color"]
-	all_contex = word_list
+	incision_contex = [["end_sharp", "edge_straight", "openness"]]
+	contusion_contex = [["end_thick","edge_irregular","oval","non_openness"]]
+	all_contex = contex_word
 	contex_list.append(incision_contex)
 	contex_list.append(contusion_contex)
 	contex_list.append(all_contex)
 	
-	sem_contex, contex_vec_list = make_context(sem_mat, word_list, contex_word, results)
+	contex_vec_list = make_context(sem_mat, word_list, contex_word, results)
 	
 	count = 0
 	for contex_word in contex_list:#全てのコンテクストについて距離を計算しdistance_listに格納
 		distances_list = []
 		distances = []#各画像から画像までの距離
 		
-		sem_contex, contex_vec_list = make_context(sem_mat, word_list, contex_word, results)
+		contex_vec_list = make_context(sem_mat, word_list, contex_word, results)
 		
 		#for img_vec in results:#画像毎にdataとの距離計算
 		#print(img_vec)
-		distances = sem_projection(sem_mat, sem_contex, results, contex_vec_list)
+		distances = sem_projection(sem_mat, results, contex_vec_list)
 		#distances_list.append(distances)
 		
 		print(distances)
