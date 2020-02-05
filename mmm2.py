@@ -242,7 +242,7 @@ def sem_projection(sem_mat, data, contex_vec_list):#dataはデータベースに
 				if(i == 1):
 					tmp1 = [0] * (len(sem_mat[0]))
 					tmp1[count1] = 1
-					print(tmp1)
+					#print(tmp1)
 					if(np.dot(np.array(tmp1), np.array(s)) < 0):#本当は＜がいい
 						count1 += 1
 						continue
@@ -318,10 +318,10 @@ def sem_projection(sem_mat, data, contex_vec_list):#dataはデータベースに
 
 
 if __name__ == '__main__':
-	d = [[1,1],[1, 0], [0, 1]]#模範データ(今の段階ではデータベースの既存データとしても利用中)
-	data = [[1, 1],[1,0],[0,1]]
-	word_list = ["soft", "hard"]
-	contex_word = [["soft"]]
+	d = [[1,0,1,1],[1, 0,1,1], [0,1,0,0],[1,0,1,0]]#模範データ(今の段階ではデータベースの既存データとしても利用中)
+	data = [[1,0,1,1], [0,1,0,0]]
+	word_list = ["open", "ir_end","st_edge","sharp_end"]
+	contex_word = [["open"]]
 	sem_mat = make_semantic_matrix(d)
 	print("sem_mat")
 	print(sem_mat)

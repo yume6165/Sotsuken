@@ -136,7 +136,7 @@ def detect_figure(img):#重心を使って最短辺から最長辺を求める
 			
 		else:#y方向に大きいとき
 			long_axi = rect[3]
-			short_axi = recr[2]
+			short_axi = rect[2]
 			max_point1 = np.array([g_point[0],rect[1]])
 			max_point2 = np.array([g_point[0],rect[1] + rect[3]])
 			min_point1 = np.array([rect[0] ,g_point[1]])
@@ -1633,7 +1633,7 @@ def mmm_operation(path):
 	contex_list.append(contusion_contex)
 	contex_list.append(all_context)
 	
-	contex_vec_list = make_context(sem_mat, word_list, contex_word, results)
+	#contex_vec_list = make_context(sem_mat, word_list, contex_word, results)
 	
 	count = 0
 	for contex_word in contex_list:#全てのコンテクストについて距離を計算しdistance_listに格納
@@ -1654,12 +1654,46 @@ def mmm_operation(path):
 			for d in distances:
 				writer.writerow(d)
 		count += 1
+	
+	
+	#案件を入力して距離を計算する	
+	count = 0
+	results_anken = copy.copy(results)
+	input_vec = np.array(read_img("D:\Sotsuken\Sotsuken_repo\input\\*")).flatten()
+	#print("##################################################")
+	#print(input_vec)
+	results_anken.insert(0,input_vec.tolist())
+	for contex_word in contex_list:#全てのコンテクストについて距離を計算しdistance_listに格納
+		distances_list = []
+		distances = []#各画像から画像までの距離
+		
+		#案件のデータをinput_vecとして入力
+		contex_vec_list = make_context(sem_mat, word_list, contex_word, results)
+		#print(results_anken)
+		
+		#for img_vec in results:#画像毎にdataとの距離計算
+		#print(img_vec)
+		distances = sem_projection(sem_mat, results_anken, contex_vec_list)
+		#distances_list.append(distances)
+		
+		#print(distances)
+		
+		with open('D:\\Sotsuken\\Sotsuken_repo\\result\\output_file\\anken_dist\\'+str(count + 1)+'_'+c_list[count]+'_context.csv', 'w') as f:
+			writer = csv.writer(f)
+			for d in distances:
+				writer.writerow(d)
+		count += 1
+		
+	with open('D:\\Sotsuken\\Sotsuken_repo\\result\\output_file\\img_vec.csv', 'w') as f:
+		writer2 = csv.writer(f)
+		for row in results_anken:
+			writer2.writerow(row)
 
 		
-	with open('D:\\Sotsuken\\Sotsuken_repo\\result\\output_file\\context_dist\\0_no_context.csv', 'w') as f:
+	with open('D:\\Sotsuken\\Sotsuken_repo\\result\\output_file\\anken_dist\\0_no_context.csv', 'w') as f:
 		writer = csv.writer(f)
 		#writer.writerow(no_context_dist(results))	
-		for d in no_context_dist(results):
+		for d in no_context_dist(results_anken):
 				writer.writerow(d)
 		
 		
