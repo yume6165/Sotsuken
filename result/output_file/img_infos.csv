@@ -1,4 +1,3 @@
-original_img,edge_img,color_hist_img,color
 D:\Sotsuken\Sotsuken_repo\result\original_img\ori_img_0.jpg,D:\Sotsuken\Sotsuken_repo\result\edge_img\edge_img_0.jpg,D:\Sotsuken\Sotsuken_repo\result\color_hist_img\color_hist_img_0.jpg,"['dark_10R', 'dark_5B', 'dark_5R']"
-D:\Sotsuken\Sotsuken_repo\result\original_img\ori_img_1.jpg,D:\Sotsuken\Sotsuken_repo\result\edge_img\edge_img_1.jpg,D:\Sotsuken\Sotsuken_repo\result\color_hist_img\color_hist_img_1.jpg,"['graylsh_5R', 'graylsh_10RP']"
-D:\Sotsuken\Sotsuken_repo\result\original_img\ori_img_2.jpg,D:\Sotsuken\Sotsuken_repo\result\edge_img\edge_img_2.jpg,D:\Sotsuken\Sotsuken_repo\result\color_hist_img\color_hist_img_2.jpg,"['graylsh_5R', 'graylsh_10R']"
+D:\Sotsuken\Sotsuken_repo\result\original_img\ori_img_1.jpg,D:\Sotsuken\Sotsuken_repo\result\edge_img\edge_img_1.jpg,D:\Sotsuken\Sotsuken_repo\result\color_hist_img\color_hist_img_1.jpg,"['graylsh_10RP', 'graylsh_5R']"
+D:\Sotsuken\Sotsuken_repo\result\original_img\ori_img_2.jpg,D:\Sotsuken\Sotsuken_repo\result\edge_img\edge_img_2.jpg,D:\Sotsuken\Sotsuken_repo\result\color_hist_img\color_hist_img_2.jpg,"['graylsh_10R', 'graylsh_5R']"

@@ -21,7 +21,7 @@ import copy
 #path = "./sample/incision_1.jpg"
 
 #ノートパソコンで研究するとき
-path = "D:\Sotsuken\Sotsuken_repo\sample\\*"
+path = "D:\Sotsuken\webapp\sample\\*"
 
 N = 1000
 

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html><!DOCTYPE html>
 <html>
   <head>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.css" rel="stylesheet">
@@ -239,11 +239,11 @@ function csvToArray(path) {
       //類似度を入力
       distance = [];
       distances = [];
-      distances.push(csvToArray("https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2F3_all_context.csv?v=1579457227508"));
+      distances.push(csvToArray("https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2F0_no_context.csv?v=1580197280435"));
       //distances.push(distance);
-      distances.push(csvToArray("https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2F1_incision_context.csv?v=1579457227532"));
+      distances.push(csvToArray("https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2F1_incision_context.csv?v=1580197280693"));
       //distances.push(distance);
-      distances.push(csvToArray("https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2F2_contusion_context.csv?v=1579457228250"));
+      distances.push(csvToArray("https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2F2_contusion_context.csv?v=1580197280719"));
       //distances.push(distance);
       console.log(distances)
       
@@ -286,6 +286,7 @@ function csvToArray(path) {
         var nodes = new vis.DataSet(node_list);
         context_nodes_list.push(nodes);
       }
+  //console.log(context_node_list);
       
       //重みの計算（文字列から数字に変換）
       w_list = [];//全体まとめる
@@ -469,15 +470,40 @@ function sort_data(w, index, context)
           //  rgb.push(b);
           //  c = RGB2Hex(rgb);
             
-            var a = {from: i, to: j, width:w, color:{highlight:c , color:c}};
+            var a = {from: i, to: j, width:w*2, color:{highlight:c , color:c}};
             edge_list.push(a);
           }
         }
         var edges = new vis.DataSet(edge_list);
         context_edges_list.push(edges);
       }
-      
-     
+    
+  
+  //卒論のためにcomputerの例を入れる（ノード）
+  //var t_node_list = [];
+  //var com = {id: 0, label: "computer", color:"#ff0000"};
+  //var soft = {id: 1, label: "software", color:"#ffff00"};
+  //var hard = {id: 2, label: "hardware", color:"#ffff00"};
+  //t_node_list.push(com);
+  //t_node_list.push(soft);
+  //t_node_list.push(hard);
+  
+  //卒論のためにcomputerの例を入れる（エッジ）
+  //var t_edge_list = [];
+  //var color = define_edge_color2(13, 14, 10);
+  //var a = {from: 0, to: 1, width:9, color:{highlight:color , color:color}};
+  //var color = define_edge_color2(13, 14, 10);
+  //var b = {from: 0, to: 2, width:9, color:{highlight:color , color:color}};
+  //var color = define_edge_color2(11, 14, 10);
+  //var c = {from: 1, to: 2, width:7, color:{highlight:color , color:color}};
+  //t_edge_list.push(a);
+  //t_edge_list.push(b);
+  //t_edge_list.push(c);
+  
+  var data ={
+    nodes:node_list,
+    edges:edge_list
+  }
       
       var container = document.getElementById('network');
       //c_numでコンテクストの数がわかっているので、そこから切り替える
@@ -696,7 +722,7 @@ function sort_data(w, index, context)
         var num2 = Number(context.options[num].value);
         //console.log(num2);
         var d = {
-        nodes: context_nodes_list[num2],
+        nodes: context_nodes_list[0],
         edges: context_edges_list[num2]
       };
         network = new vis.Network(container, d, options);
