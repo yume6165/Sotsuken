@@ -17,16 +17,21 @@ import csv
 import collections as cl
 import copy
 
-#研究室で研究するとき
-#path = "./sample/incision_1.jpg"
+
 
 #ノートパソコンで研究するとき
-path = "D:\Sotsuken\webapp\public\sample\\*"
+
+#path = "D:\Sotsuken\webapp\public\sample\\*"
+anken_path = "D:\Sotsuken\\webapp\\public\\input\\*"
+
+#node.jsからデータをもらって実行
+path = sys.stdin.readline()
+path = path[:-1]
 
 N = 1000
 
 thresh = 1.0E-10
-
+id = 0
 
 #
 #画像処理
@@ -840,7 +845,7 @@ def toLab(img):
 			color_list.append(deg[1] +"_10G")
 		
 	
-	print(list(set(color_list)))
+	#print(list(set(color_list)))
 	
 	#img = cv.imread(hist)
 	#cv.imshow()
@@ -1246,7 +1251,7 @@ def judge(id, img):
 	
 	
 	#画像データをまとめる(画像は書き出してパスをわたすことにした)
-	result_path = 'D:\\Sotsuken\\webapp\\public\\result\\'
+	result_path = 'D:Sotsuken\\webapp\\public\\result\\'
 	path1 = str(result_path)+ 'original_img\\ori_img_' + str(id) + '.jpg'
 	path2 = str(result_path)+ 'edge_img\\edge_img_'+str(id)+'.jpg'
 	path3 = str(result_path)+ 'color_hist_img\\color_hist_img_'+str(id)+'.jpg'
@@ -1273,12 +1278,50 @@ def judge(id, img):
 	
 	return result,data
 	
-	
+#データベースの画像データを記録する	
 def read_img(folder):#フォルダを指定して
+	global id
+	#print("データベースよみこみ！！！！！！！！"+str(id))
 	files = glob.glob(folder)
 	results = []
 	data_list = []
-	id = 0
+	
+	for file in files:
+		#print(file)
+		img = cv.imread(file, cv.IMREAD_COLOR)
+		#sharp, oval, pull, push = judge(img)
+		#print("データベースよみこみ！！！！！！！！"+str(id))
+		result, data = judge(id, img)
+		data_list.append(data)
+		results.append(result)
+		id += 1
+	
+	#データベースの画像データを追記
+		#print(data_list)
+	with open('D:\\Sotsuken\\webapp\\public\\result\\output_file\\img_infos.csv', 'a') as f:
+		writer = csv.DictWriter(f, ['original_img', 'edge_img', 'color_hist_img', 'color'])
+		#ヘッダの書き込み
+		#writer.writeheader()
+		
+		for data in data_list:
+			#print(data)
+			writer.writerow(data)
+			
+	with open('D:\\Sotsuken\\webapp\\public\\result\\output_file\\img_vec.csv', 'a') as f:
+		writer2 = csv.writer(f)
+		for row in results:
+			writer2.writerow(row)
+		
+	return results
+
+
+#案件の画像データを記録する
+def anken_read_img(folder):#フォルダを指定して
+	global id
+	#print("案件よみこみ！！！！！！！！"+str(id))
+	files = glob.glob(folder)
+	results = []
+	data_list = []
 	
 	for file in files:
 		#print(file)
@@ -1304,8 +1347,7 @@ def read_img(folder):#フォルダを指定して
 		for row in results:
 			writer2.writerow(row)
 		
-	return results
-	
+	return results	
 	
 #
 #
@@ -1376,7 +1418,7 @@ def make_context(sem_mat, word_list, contex_word, data):
 				#for i in range(100):
 					#contex_mat.append(relation_mat[i + 7])
 			index = word_list.index(word)
-			print("index : "+str(index))
+			#print("index : "+str(index))
 			contex_mat[index] = 1
 			context_vec_list.append(contex_mat)
 	
@@ -1411,8 +1453,8 @@ def sem_projection(sem_mat, data, contex_vec_list):#dataはデータベースに
 			max = num
 		
 	
-	print("div_vec : ")
-	print(max)
+	#print("div_vec : ")
+	#print(max)
 	
 	#意味重心ベクトル
 	G = []
@@ -1424,11 +1466,11 @@ def sem_projection(sem_mat, data, contex_vec_list):#dataはデータベースに
 		tmp = s
 		if(w < 0):
 			tmp = -1 * s
-			print(tmp)
+			#print(tmp)
 		tmp_sem.append(tmp)
 		G.append(w / max)
-	print("Gravity")
-	print(G)
+	#print("Gravity")
+	#print(G)
 	
 	#すべての文脈語と意味素の内積和をすべての意味素における、すべての文脈語と意味素との内積の和を並べてベクトル化したモノを最大ノルムで割る
 	weigth_c = []#各意味素における重みを入れておく箱
@@ -1445,10 +1487,10 @@ def sem_projection(sem_mat, data, contex_vec_list):#dataはデータベースに
 			w  = 0
 		weigth_c.append(w / max)
 		count += 1
-	print("weight")
-	print(weigth_c)
-	print("tmp_sem")
-	print(tmp_sem)
+	#print("weight")
+	#print(weigth_c)
+	#print("tmp_sem")
+	#print(tmp_sem)
 	
 	#print(len(weigth_c))
 	#print(sem_contex)
@@ -1472,7 +1514,7 @@ def sem_projection(sem_mat, data, contex_vec_list):#dataはデータベースに
 				if(i == 1):
 					tmp1 = [0] * (len(sem_mat[0]))
 					tmp1[count1] = 1
-					print(tmp1)
+					#print(tmp1)
 					if(np.dot(np.array(tmp1), np.array(s)) < 0):#本当は＜がいい
 						count1 += 1
 						continue
@@ -1482,8 +1524,8 @@ def sem_projection(sem_mat, data, contex_vec_list):#dataはデータベースに
 			d_vec.append(tmp)
 		data_vec.append(d_vec)
 		
-	print("data_vec")
-	print(data_vec)
+	#print("data_vec")
+	#print(data_vec)
 		
 	#距離計算
 	for d1 in data_vec:
@@ -1517,8 +1559,8 @@ def sem_projection(sem_mat, data, contex_vec_list):#dataはデータベースに
 	#		tmp_cxy.append(sum)
 			
 	#	cxy.append(tmp_cxy)
-	print("distance")		
-	print(cxy)
+	#print("distance")		
+	#print(cxy)
 	
 	
 	
@@ -1548,7 +1590,10 @@ def sem_projection(sem_mat, data, contex_vec_list):#dataはデータベースに
 
 
 	
-def mmm_operation(path):
+def mmm_operation(path, anken_path):
+	#案件のデータを処理
+	input_vec = np.array(anken_read_img(anken_path)).flatten()
+
 	results = read_img(path)
 	#data_listhは画像のパスまで入っている
 	#resultsは単純にベクトルのみ
@@ -1594,7 +1639,7 @@ def mmm_operation(path):
 		distances = sem_projection(sem_mat, results, contex_vec_list)
 		#distances_list.append(distances)
 		
-		print(distances)
+		#print(distances)
 		
 		with open('D:\\Sotsuken\\webapp\\public\\result\\output_file\\context_dist\\'+str(count + 1)+'_'+c_list[count]+'_context.csv', 'w') as f:
 			writer = csv.writer(f)
@@ -1609,6 +1654,44 @@ def mmm_operation(path):
 		for d in no_context_dist(results):
 				writer.writerow(d)
 		
+	#案件の距離を計算する	
+	count = 0
+	results_anken = copy.copy(results)
+	#print("##################################################")
+	#print(input_vec)
+	results_anken.insert(0,input_vec.tolist())
+	for contex_word in contex_list:#全てのコンテクストについて距離を計算しdistance_listに格納
+		distances_list = []
+		distances = []#各画像から画像までの距離
+		
+		#案件のデータをinput_vecとして入力
+		contex_vec_list = make_context(sem_mat, word_list, contex_word, results)
+		#print(results_anken)
+		
+		#for img_vec in results:#画像毎にdataとの距離計算
+		#print(img_vec)
+		distances = sem_projection(sem_mat, results_anken, contex_vec_list)
+		#distances_list.append(distances)
+		
+		#print(distances)
+		
+		with open('D:\\Sotsuken\\webapp\\public\\result\\output_file\\anken_dist\\'+str(count + 1)+'_'+c_list[count]+'_context.csv', 'w') as f:
+			writer = csv.writer(f)
+			for d in distances:
+				writer.writerow(d)
+		count += 1
+		
+	with open('D:\\Sotsuken\\webapp\\public\\result\\output_file\\img_vec.csv', 'w') as f:
+		writer2 = csv.writer(f)
+		for row in results_anken:
+			writer2.writerow(row)
+
+		
+	with open('D:\\Sotsuken\\webapp\\public\\result\\output_file\\anken_dist\\0_no_context.csv', 'w') as f:
+		writer = csv.writer(f)
+		#writer.writerow(no_context_dist(results))	
+		for d in no_context_dist(results_anken):
+				writer.writerow(d)
 		
 	#文脈毎にcsvで出力
 		
@@ -1619,5 +1702,5 @@ def mmm_operation(path):
 if __name__ == '__main__':
 
 	#意味空間を構成するための画像群（のちのLMMLファイル）が入っているフォルダのパスを渡す
-	mmm_operation(path)
+	mmm_operation(path, anken_path)
 	cv.waitKey()

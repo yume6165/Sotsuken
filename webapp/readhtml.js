@@ -1,17 +1,17 @@
 //pythonの実行
 var {PythonShell} = require('./node_modules/python-shell');
-
-var {PythonShell} = require('python-shell');
-PythonShell.run('D:/Sotsuken/webapp/main.py', null, function (err) {
-  if (err) throw err;
-  console.log('finished');
-});
-
+var pyshell = new PythonShell('D:Sotsuken/webapp/main.py');
+pyshell.send('D:\\Sotsuken\\webapp\\public\\sample\\*');
+pyshell.on('message', function(data){
+	console.log(data);
+	console.log('finish');
+})
 
 
 //１:モジュールのロード
 const http = require('http');
 const fs = require('fs');
+const csvSync  = require('csv-parse/lib/sync');
 var mime = {
   ".html": "text/html",
   ".css":  "text/css"
@@ -41,7 +41,33 @@ function getCss(req, res){
 			res.writeHead(200, {'Content-Type': 'text/css'});
 			res.write(data);
 			res.end();
-			console.log("get CSS!")
+			console.log("get CSS!");
+		});
+	}else if(url.search('/original_img/') !== -1)
+	{//画像の参照が来たら画像フォルダを指定して返したい
+		res.writeHead(200, {'Content-Type': 'image/jpeg; charset=utf-8'});
+		res.end(fs.readFileSync('D:/Sotsuken/webapp/public' +url, 'binary'), 'binary');	
+		console.log("get Original Image");
+		
+	}else if(url.search('/edge_img/') !== -1)
+	{//画像の参照が来たら画像フォルダを指定して返したい
+		res.writeHead(200, {'Content-Type': 'image/jpeg; charset=utf-8'});
+		res.end(fs.readFileSync('D:/Sotsuken/webapp/public' +url, 'binary'), 'binary');	
+		console.log("get Edge Image");
+		
+	}else if(url.search('/color_hist_img/') !== -1)
+	{//画像の参照が来たら画像フォルダを指定して返したい
+		res.writeHead(200, {'Content-Type': 'image/jpeg; charset=utf-8'});
+		res.end(fs.readFileSync('D:/Sotsuken/webapp/public' +url, 'binary'), 'binary');	
+		console.log("get Color Hist Image");
+		
+	}else if(url.search('/anken_dist/') !== -1)
+		{
+			fs.readFile('D:/Sotsuken/webapp/public/'+url, 'UTF-8',function(err, data){
+			res.writeHead(200, {'Content-Type': 'text/csv'});
+			res.write(data);
+			res.end();
+			console.log("get CSV!");
 		});
 	}
 	

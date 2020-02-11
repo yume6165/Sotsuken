@@ -9,7 +9,8 @@
    
     <!--chart.jsを利用-->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.1.4/Chart.min.js"></script>
-  
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+	
   </head>
   <body>
     <div class="title_space">
@@ -231,7 +232,8 @@ function csvToArray(path) {
         }
         return csvData;
 }
-      
+
+  
       
       
       //データのインプット
@@ -239,31 +241,33 @@ function csvToArray(path) {
       //類似度を入力
       distance = [];
       distances = [];
-      distances.push(csvToArray("https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2F0_no_context.csv?v=1580197280435"));
+      distances.push(csvToArray("./result/output_file/anken_dist/0_no_context.csv"));
+	  //console.log(distances)
       //distances.push(distance);
       distances.push(csvToArray("https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2F1_incision_context.csv?v=1580197280693"));
       //distances.push(distance);
       distances.push(csvToArray("https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2F2_contusion_context.csv?v=1580197280719"));
       //distances.push(distance);
-      console.log(distances)
+      //console.log(distances)
       
       
       //画像データを読み込み
       img_info = [];
-      img_info.push(csvToArray("https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2Fimg_infos.csv?v=1581078899323"));
-      //余分な配列を削除する
+      img_info.push(csvToArray("https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2Fimg_infos.csv?v=1581089085901"));
+      
+	  //余分な配列を削除する
       //console.log(img_info[0]);
-      for(var i=0; i < Math.floor((img_info[0].length) / 2)+1; i++)
-      { 
-          img_info[0].splice(1 + i, 1);
-      }
-      //console.log(img_info[0]);
+      //for(var i=0; i < Math.floor((img_info[0].length) / 2)+1; i++)
+      //{ 
+      //    img_info[0].splice(1 + i, 1);
+      //}
+      //console.log(img_info);
       
       
       //画像のベクトルを読み込み
       img_vec = [];
-      img_vec.push(csvToArray("https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2Fimg_vec.csv?v=1579577810369"));
-      //console.log(img_vec[0]);
+      img_vec.push(csvToArray("https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2Fimg_vec.csv?v=1581088250439"));
+      console.log(img_vec);
       
       //console.log(distances);
       c_num = distances.length;
@@ -549,10 +553,10 @@ function sort_data(w, index, context)
           wound_ori_img.src = img_info[0][nodeId][0];
           wound_edge_img.src = img_info[0][nodeId][1];
           wound_color_map.src = img_info[0][nodeId][2];
-          
+          console.log(wound_ori_img.src);
           //画像の名前適用
           var wound_name = document.getElementById("wound_name");
-          wound_name.innerHTML = "Wound_"+ String(nodeId);
+          //wound_name.innerHTML = "Wound_"+ String(nodeId);
           
           //iconの透過度を変更
           //console.log(img_vec[0][nodeId]);
