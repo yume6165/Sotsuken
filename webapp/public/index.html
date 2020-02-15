@@ -6,7 +6,9 @@
     <link rel="stylesheet" type="text/css" href="./css/style.css">
     
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js"></script>
-   
+    
+	<script src='./js/jquery.min.js'></script>
+
     <!--chart.jsを利用-->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.1.4/Chart.min.js"></script>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
@@ -27,7 +29,7 @@
     </select>
     </form>
     <button type="button" name="select_context" onclick="app_context()">
-    <font size="1">適用</font>
+    <font size="1">apply</font>
     </button>
     
     </div>
@@ -43,8 +45,47 @@
     </div>
     </div>
     
-    <!--創傷の情報表示-->
+    <!--創傷の詳細-->
     <div class="inline_box">
+	<!--案件データの読み込み-->
+	<div class="name_box"><p id="wound_name">Read Data</p></div>
+	<div id="main_data">
+	Main Data : 
+	<button type="button" class="js-modal-open" name="select_anken" onclick="search_file_a()">
+    <font size="1">Reference</font>
+    </button>
+    <div class="modal js-modal">
+		
+        <div class="modal__bg js-modal-close"></div>
+		<div class="sub_modal">
+        <div class="modal__content">
+		<p>Researching apploaded datas…</p>
+        </div><!--modal__inner-->
+		<button type="button" name="upload_anken" onclick="upload()">Upload</button>
+		<button type="button" class="js-modal-close">Back</button>
+		</div>
+    </div><!--modal-->
+	
+	</div>
+	<div id="data_base">
+	Data Base : 
+	<button type="button" class="js-modal-open" name="select_db" onclick="search_file_d()">
+    <font size="1">Reference</font>
+    </button>
+    <div class="modal js-modal">
+		
+        <div class="modal__bg js-modal-close"></div>
+		<div class="sub_modal">
+        <div class="modal__content">
+		<p>Researching apploaded datas…</p>
+        </div><!--modal__inner-->
+		<button type="button" name="upload_anken" onclick="upload()">Upload</button>
+		<button type="button" class="js-modal-close">Back</button>
+		</div>
+    </div><!--modal-->
+	
+	</div>
+	<!--創傷データの表示-->
     <div id="wound_feild">
       <div id="wound_img_name">
         <div class="name_box"><p id="wound_name">Wound Name</p></div>
@@ -828,7 +869,147 @@ function sort_data(w, index, context)
       });
         }  
     
-    
+    //案件データの読み込み（ローカルファイルのパスを得る）
+	function loadFile_changeHandler(e){
+    var files = e.target.files;
+    var fileData = "";
+    for(var i = 0; i < files.length; i++){
+        var fileVal = files[i];
+        fileData +=
+            'ファイル名：' + escape(fileVal.name) + '<br>' +
+            'ファイルサイズ：' + fileVal.size + ' バイト<br>' +
+            'MIMEタイプ：' + fileVal.type + '<br>' +
+            '最終更新日時：' + fileVal.lastModifiedDate + '<hr>';
+        }
+	
+	}
+ 
+	function $(id) {
+		return document.querySelector(id);
+	}
+	
+	function search_file_a(){//readhtml.js(nodejs)に接続したい
+		//console.log("Hello");
+		var result = "";
+		
+		jQuery(function($){
+		$('#info').innerHTML = fileData;
+		});
+		var url = './anken_search';
+		var request = new XMLHttpRequest();
+		request.open('GET', url);
+		request.onreadystatechange = function(){
+			if(request.readyState != 4){
+				//リクエスト中
+			}else if(request.status != 200){
+				//失敗
+			}else{
+				//取得成功:案件情報の取得
+				result = request.responseText;
+				result = result.replace('[','');
+				result = result.replace(']','');
+				result = result.split(',');
+				var f_names = [];
+				for(var i = 0; i < result.length; i++){
+					var f_name = result[i].split('\\');
+					f_name[f_name.length - 1] = f_name[f_name.length - 1].replace("'", "");
+					f_names.push(f_name[f_name.length - 1]);
+					//console.log(f_name[f_name.length - 1]);
+				}
+				
+				jQuery(function($){
+					//<button type="button" class="js-modal-close">×</button>
+					//案件データの検索結果を表示するhtmlの作成
+					var html ='<div>';
+					html += 'Select data which you want to take.</br>';
+					html += '<select name="example">';
+					for(var i = 0; i < result.length; i++){
+						html += '<option value="'+ String(i) + '">' + f_names[i] + '</option>'
+					}
+					html += '</select></br>';
+					//html += '';
+					html +='</div>';
+					$('.modal__content').html(html);
+				});
+				//console.log(result);
+			}
+		};
+		request.send(null);
+		
+		
+	}
+	
+	function upload(){
+		return console.log("ここで画像をアップします！");
+	}
+	
+	jQuery(function($){
+			
+			$('.js-modal-open').on('click',function(){
+			$('.js-modal').fadeIn();
+			return false;
+			});
+			$('.js-modal-close').on('click',function(){
+				$('.js-modal').fadeOut();
+				return false;
+			});
+		});
+	
+	function search_file_d(){//readhtml.js(nodejs)に接続したい
+		//console.log("Hello");
+		var result = "";
+		
+		jQuery(function($){
+		$('#info').innerHTML = fileData;
+		});
+		var url = './db_search';
+		var request = new XMLHttpRequest();
+		request.open('GET', url);
+		request.onreadystatechange = function(){
+			if(request.readyState != 4){
+				//リクエスト中
+			}else if(request.status != 200){
+				//失敗
+			}else{
+				//取得成功:案件情報の取得
+				//データセットになるので，フォルダの選択やアップロードをしなくてはいけない（後日）
+				
+				result = request.responseText;
+				result = result.replace('[','');
+				result = result.replace(']','');
+				result = result.split(',');
+				var f_names = [];
+				for(var i = 0; i < result.length; i++){
+					var f_name = result[i].split('\\');
+					f_name[f_name.length - 1] = f_name[f_name.length - 1].replace("'", "");
+					f_names.push(f_name[f_name.length - 1]);
+					//console.log(f_name[f_name.length - 1]);
+				}
+				
+				jQuery(function($){
+					//<button type="button" class="js-modal-close">×</button>
+					//案件データの検索結果を表示するhtmlの作成
+					var html ='<div>';
+					html += 'Select data sets which you want to take.</br>';
+					html += '<select name="example">';
+					for(var i = 0; i < result.length; i++){
+						html += '<option value="'+ String(i) + '">' + f_names[i] + '</option>'
+					}
+					html += '</select></br>';
+					//html += '';
+					html +='</div>';
+					$('.modal__content').html(html);
+				});
+				//console.log(result);
+			}
+		};
+		request.send(null);
+		
+		
+	}
+
+	
+	
     </script>
     
 

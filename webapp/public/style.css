@@ -13,6 +13,55 @@ h1 {
   color: #ffffff;
 }
 
+*{
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+.content{
+    margin: 0 auto;
+    padding: 40px;
+}
+
+.modal{
+    display: none;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    width: 100%;
+}
+.modal__bg{
+    background: rgba(0,0,0,0.8);
+    height: 100vh;
+    position: absolute;
+    width: 100%;
+}
+.modal__content{
+    background: #fff;
+}
+
+.sub_modal{
+	background: #fff;
+	text-align: center;
+    left: 50%;
+    padding: 40px;
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%,-50%);
+    width: 60%;
+}
+
+/* 以下ボタンスタイル */
+button {
+  padding: 5px;
+  margin: 4px;
+  background-color: #fff;
+  border: 1px solid #282828;
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+
 .title_space
 {
   background-color:black;
@@ -49,14 +98,11 @@ h1 {
 
 .name_box
 {
-    padding: 0.5em 1em;
-   
-    margin-top:0px;
-    margin-bottom:3px;
-    color: #474747;
-    background: whitesmoke;/*背景色*/
-    border-left: double 7px #4ec4d3;/*左線*/
-    border-right: double 7px #4ec4d3;/*右線*/
+    padding: 0.4em 0.5em;/*文字の上下 左右の余白*/
+  color: #494949;/*文字色*/
+  background: #f4f4f4;/*背景色*/
+  border-left: solid 5px #66cdaa;/*左線*/
+  border-bottom: solid 3px #d7d7d7;/*下線*/
 }
 
 .name_box p {

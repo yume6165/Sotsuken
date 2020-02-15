@@ -22,11 +22,14 @@ import copy
 #ノートパソコンで研究するとき
 
 #path = "D:\Sotsuken\webapp\public\sample\\*"
-anken_path = "D:\Sotsuken\\webapp\\public\\input\\*"
+#anken_path = "D:\Sotsuken\\webapp\\public\\input\\*"
 
 #node.jsからデータをもらって実行
 path = sys.stdin.readline()
 path = path[:-1]
+anken_path = sys.stdin.readline()
+anken_path = anken_path[:-1]
+#print(anken_path)
 
 N = 1000
 
