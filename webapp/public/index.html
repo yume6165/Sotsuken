@@ -8,6 +8,8 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js"></script>
     
 	<script src='./js/jquery.min.js'></script>
+	
+
 
     <!--chart.jsを利用-->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.1.4/Chart.min.js"></script>
@@ -18,7 +20,10 @@
     <div class="title_space">
     <p id="title">THEMIS -THeoretical Estimation of Meaning of InSult-</p>
     </div>
-      
+     
+	
+	
+	<div id="wrap">
     <div class="inline_box">
     <div id="select_context">
     <form name="select_context">
@@ -41,8 +46,17 @@
     <div class="inline_box">
     <div id="network"></div>
     <div id="mater">
-      Color_mater
+      　　　<!--わざと空白入れてる-->
     </div>
+	
+	<!--情報をフィルタリングする-->
+	<div id="graph_filter">
+		Display rate of Edges
+		<!--ドラッグ中に数値が変化してほしいのでonclicはあえて使わない-->
+		<input type="range" id="range" min="0" max="100" step="10" value="100">
+ <span id="value">100</span>％
+	</div>
+	
     </div>
     
     <!--創傷の詳細-->
@@ -51,36 +65,44 @@
 	<div class="name_box"><p id="wound_name">Read Data</p></div>
 	<div id="main_data">
 	Main Data : 
-	<button type="button" class="js-modal-open" name="select_anken" onclick="search_file_a()">
+	<button type="button" class="anken_js-modal-open" name="select_anken" onclick="search_file_a()">
     <font size="1">Reference</font>
     </button>
-    <div class="modal js-modal">
+    <div class="anken_modal anken_js-modal">
 		
-        <div class="modal__bg js-modal-close"></div>
-		<div class="sub_modal">
-        <div class="modal__content">
+        <div class="anken_modal__bg anken_js-modal-close"></div>
+		<div class="anken_sub_modal">
+        <div class="anken_modal__content">
 		<p>Researching apploaded datas…</p>
         </div><!--modal__inner-->
-		<button type="button" name="upload_anken" onclick="upload()">Upload</button>
-		<button type="button" class="js-modal-close">Back</button>
+		<form action="./anken_up" id="anken_up" method="POST">
+		<input type="file" name="anken">
+		<input type="submit" name="up_anken" value="Upload">
+		</form>
+		<input id="anken" type="hidden" value="hoge">
+		<button type="button" class="anken_js-modal-close">Back</button>
 		</div>
     </div><!--modal-->
 	
 	</div>
 	<div id="data_base">
 	Data Base : 
-	<button type="button" class="js-modal-open" name="select_db" onclick="search_file_d()">
+	<button type="button" class="db_js-modal-open" name="select_db" onclick="search_file_d()">
     <font size="1">Reference</font>
     </button>
-    <div class="modal js-modal">
+    <div class="db_modal db_js-modal">
 		
-        <div class="modal__bg js-modal-close"></div>
-		<div class="sub_modal">
-        <div class="modal__content">
+        <div class="db_modal__bg db_js-modal-close"></div>
+		<div class="db_sub_modal">
+        <div class="db_modal__content">
 		<p>Researching apploaded datas…</p>
         </div><!--modal__inner-->
-		<button type="button" name="upload_anken" onclick="upload()">Upload</button>
-		<button type="button" class="js-modal-close">Back</button>
+		<form id="db_up">
+		<input type="file" name="db">
+		<input type="submit" name="up_db" onclick="upload_db()" value="Upload">
+		</form>
+		<input id="db" type="hidden" value="db">
+		<button type="button" class="db_js-modal-close">Back</button>
 		</div>
     </div><!--modal-->
 	
@@ -121,6 +143,7 @@
     </div>
     
     <div id="timeline"></div>
+	</div>
     
 <script type="text/javascript">
 
@@ -488,9 +511,11 @@ function sort_data(w, index, context)
       
       //ここからグラフ描画のための準備
       context_edges_list =[];
+	  context_edges_list_b = [];//こちらは単純にリスト構造
       for(var k=0; k < c_num; k++)
       {
         edge_list = [];
+		var count = 0
         for(var i = 0; i < i_num; i++)
         {
           for(var j = i+1; j < i_num ; j++)
@@ -515,12 +540,14 @@ function sort_data(w, index, context)
           //  rgb.push(b);
           //  c = RGB2Hex(rgb);
             
-            var a = {from: i, to: j, width:w*2, color:{highlight:c , color:c}};
+            var a = {id:count, from: i, to: j, width:w*2, color:{highlight:c , color:c}};
             edge_list.push(a);
+			count += 1;
           }
         }
         var edges = new vis.DataSet(edge_list);
         context_edges_list.push(edges);
+		context_edges_list_b.push(edge_list);
       }
     
   
@@ -755,12 +782,88 @@ function sort_data(w, index, context)
       });
         
       });
-      
+	  
+	  
+	  
+	//ネットワークの"Display rate of edges"のスライダーバーの設定
+	//ノードの場合はエッジも切らないといけない
+	var elem = document.getElementById('range');
+	var target = document.getElementById('value');
+	var rangeValue = function (elem, target) {
+		return function(evt){
+		var flag = 0;//エッジを足すのか引くのかを示すフラグ
+		if(Number(target.innerHTML) < Number(elem.value))
+		{
+			flag = 1;
+		}
+
+		target.innerHTML = elem.value;
+		//elem.valueは文字列
+		//ここにエッジの再描画を記述
+		//console.log(edges)
+		//エッジの本数を取得
+		edge_length = Number(edges.length);
+		
+		//何本表示するかを計算
+		view_length = Math.floor(Number(elem.value) * edge_length / 100);
+		hide_length = edge_length - view_length;
+		
+		//elem.valueに値する本数だけ残して後は隠す
+		var context = document.select_context.select_context;
+        var num = context.selectedIndex;
+        var num2 = Number(context.options[num].value);
+        
+		//利用しているエッジは下のエッジ
+		//console.log(context_edges_list_b[num2]);
+		//console.log(context_edges_list[num2]);
+		//重みの相関グラフ（読み込んだやつ）から相関が小さいエッジのidを探して非表示にする
+		
+		//エッジの小さい順にidを並べて非表示にするものを探し出す
+		//ここのソートはエッジを作成段階で行ってもいいかも
+		for(var i=0; i < edge_length; i++)
+		{
+			context_edges_list_b[num2].sort(function(a, b){
+				if(a.width > b.width){
+					return 1;
+				}else{
+					return -1;
+				}
+			})
+		}
+		//重みが小さい順に並び替えられている
+		//console.log(context_edges_list_b[num2]);		
+		
+		
+		//表示する割合が減ったとき：類似度の低いエッジから消していく
+		if(flag == 0)
+		{
+			//console.log("消すのは"+hide_length+"本です");
+			for(var i=0; i < hide_length; i++)
+			{
+				var num = Number(context_edges_list_b[num2][i].id);
+				//console.log(num+"を隠します");
+				network.body.data.edges.update({id: num, hidden: true});
+				network.fit();
+			}
+		}else//表示する割合が増えたとき：類似度の高いエッジから表示していく
+		{
+			//console.log(edge_length+"本表示するよ！！");
+			for(var i=0; i < view_length; i++)
+			{
+				var num = Number(context_edges_list_b[num2][edge_length - i - 1].id);
+				//console.log(num+"を表示します");
+				network.body.data.edges.update({id: num, hidden: false});
+				network.fit();
+			}
+		}
+	  }
+	}
+	elem.addEventListener('input', rangeValue(elem, target));
+
+	
     function app_context()//文脈を読み込んで表示
       {
         //console.log("app_contextが押されました");
-      
-        
         var context = document.select_context.select_context;
         var num = context.selectedIndex;
         //console.log(context);
@@ -771,7 +874,85 @@ function sort_data(w, index, context)
         edges: context_edges_list[num2]
       };
         network = new vis.Network(container, d, options);
+		
+         network.on("click", function(params) {
+        if (params.nodes.length == 1) {
+          var nodeId = params.nodes[0];
+          var node = nodes.get(nodeId);
+          //var option_select = {};
+          nodes.update([{id: 1, color: {background: '#ffffff'}}]); 
+          //network.setOptions(option_select);
+          console.log(node.label + 'がクリックされました');
+          
+          
+          //nodeIDから情報を習得して創傷の情報を表示
+          //傷画像の表示
+          var wound_ori_img = document.getElementById("wound_ori_img");
+          var wound_edge_img = document.getElementById("wound_edge_img");
+          var wound_color_map = document.getElementById("wound_color_map");
+          wound_ori_img.src = img_info[0][nodeId][0];
+          wound_edge_img.src = img_info[0][nodeId][1];
+          wound_color_map.src = img_info[0][nodeId][2];
+          console.log(wound_ori_img.src);
+          //画像の名前適用
+          var wound_name = document.getElementById("wound_name");
+          //wound_name.innerHTML = "Wound_"+ String(nodeId);
+          
+          //iconの透過度を変更
+          //console.log(img_vec[0][nodeId]);
+          var open_icon = document.getElementById("open_icon");
+          var close_icon = document.getElementById("close_icon");
+          var end_sharp_icon = document.getElementById("end_sharp_icon");
+          var end_irregular_icon = document.getElementById("end_irregular_icon");
+          var end_thick_icon = document.getElementById("end_thick_icon");
+          var edge_straight_icon = document.getElementById("edge_straight_icon");
+          var oval_icon = document.getElementById("oval_icon");
+          //var contusion_bruise_icon = document.getElementById("contusion_bruise_icon");
+          
+          //透過度の初期化（全て透過度0.3へ）
+          open_icon.style.opacity = 0.3;
+          close_icon.style.opacity = 0.3;
+          end_sharp_icon.style.opacity = 0.3;
+          end_irregular_icon.style.opacity = 0.3;
+          end_thick_icon.style.opacity = 0.3;
+          edge_straight_icon.style.opacity = 0.3;
+          oval_icon.style.opacity = 0.3;
+          edge_irregular_icon.style.opacity = 0.3;
+          
+          if(img_vec[0][nodeId][0] == "1")
+            end_sharp_icon.style.opacity = 1.0;
+          
+          if(img_vec[0][nodeId][1] == "1")
+            end_thick_icon.style.opacity = 1.0;
+              
+          if(img_vec[0][nodeId][2] == "1")
+            edge_irregular_icon.style.opacity = 1.0;
+              
+          if(img_vec[0][nodeId][3] == "1")
+            edge_straight_icon.style.opacity = 1.0;
+              
+          if(img_vec[0][nodeId][4] == "1")
+            oval_icon.style.opacity = 1.0;
+              
+          if(img_vec[0][nodeId][5] == "1")
+            open_icon.style.opacity = 1.0;
+              
+          if(img_vec[0][nodeId][6] == "1")
+            close_icon.style.opacity = 1.0;
+         
+         //end_irregularはまだ実装してないので保留
+         // if(img_vec[0][nodeId][7] == "1")
+         //   end_irregular_icon.style.opacity = 1.0;
+              
+           
+        }
         
+        var context = document.select_context.select_context;
+        var num = context.selectedIndex;
+        //console.log(context);
+        var num2 = Number(context.options[num].value);
+        //console.log(num2);
+		
         //棒グラフの更新
         var a = Math.sqrt(w_list[num2].length);//データの数
         var tmp = w_list[num2];
@@ -867,6 +1048,7 @@ function sort_data(w, index, context)
               }
           }
       });
+	  });
         }  
     
     //案件データの読み込み（ローカルファイルのパスを得る）
@@ -929,7 +1111,7 @@ function sort_data(w, index, context)
 					html += '</select></br>';
 					//html += '';
 					html +='</div>';
-					$('.modal__content').html(html);
+					$('.anken_modal__content').html(html);
 				});
 				//console.log(result);
 			}
@@ -939,21 +1121,30 @@ function sort_data(w, index, context)
 		
 	}
 	
-	function upload(){
-		return console.log("ここで画像をアップします！");
-	}
-	
 	jQuery(function($){
 			
-			$('.js-modal-open').on('click',function(){
-			$('.js-modal').fadeIn();
+			$('.anken_js-modal-open').on('click',function(){
+			$('.anken_js-modal').fadeIn();
 			return false;
 			});
-			$('.js-modal-close').on('click',function(){
-				$('.js-modal').fadeOut();
+			$('.anken_js-modal-close').on('click',function(){
+				$('.anken_js-modal').fadeOut();
 				return false;
 			});
 		});
+		
+	jQuery(function($){
+			
+			$('.db_js-modal-open').on('click',function(){
+			$('.db_js-modal').fadeIn();
+			return false;
+			});
+			$('.db_js-modal-close').on('click',function(){
+				$('.db_js-modal').fadeOut();
+				return false;
+			});
+		});
+	
 	
 	function search_file_d(){//readhtml.js(nodejs)に接続したい
 		//console.log("Hello");
@@ -985,10 +1176,11 @@ function sort_data(w, index, context)
 					f_names.push(f_name[f_name.length - 1]);
 					//console.log(f_name[f_name.length - 1]);
 				}
-				
+				console.log(f_name[0]);
 				jQuery(function($){
 					//<button type="button" class="js-modal-close">×</button>
 					//案件データの検索結果を表示するhtmlの作成
+					
 					var html ='<div>';
 					html += 'Select data sets which you want to take.</br>';
 					html += '<select name="example">';
@@ -998,7 +1190,7 @@ function sort_data(w, index, context)
 					html += '</select></br>';
 					//html += '';
 					html +='</div>';
-					$('.modal__content').html(html);
+					$('.db_modal__content').html(html);
 				});
 				//console.log(result);
 			}
@@ -1007,8 +1199,39 @@ function sort_data(w, index, context)
 		
 		
 	}
-
 	
+	//案件のアップロード
+	function upload_anken(){
+		//formデータの取得
+		jQuery(function($){
+		$(document).on('change','input[name="anken"]',function(){
+		var fd = new FormData();
+		if ($("input[name='anken']").val()!== '') {
+			fd.append( "file", $("input[name='anken']").prop("files")[0] );
+		}
+		fd.append("dir",$("#anken").val());
+		var postData = {
+			type : "POST",
+			dataType : "text",
+			data : fd,
+			processData : false,
+			contentType : false
+		};
+		$.ajax(
+			"upload.php", postData
+		).done(function( text ){
+			console.log(text);
+		});
+		});
+		});
+	}
+	
+	//データベースのアップロード
+	function upload_db(){
+		console.log("ここで画像をアップします！");
+	}
+	
+
 	
     </script>
     

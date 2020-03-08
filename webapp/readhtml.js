@@ -13,6 +13,7 @@ pyshell.on('message', function(data){
 const http = require('http');
 const fs = require('fs');
 const csvSync = require('csv-parse/lib/sync');
+
 var mime = {
   ".html": "text/html",
   ".css":  "text/css"
@@ -27,8 +28,11 @@ server.listen(3000);
 console.log('Server running');
 
 
+
 function getURL(req, res){
 	var url = req.url;
+	console.log(url);
+	
 	if('/' == url){
 		fs.readFile('D:/Sotsuken/webapp/public/index.html', 'UTF-8',function(err, data){
 			res.writeHead(200, {'Content-Type': 'text/html'});
@@ -86,7 +90,7 @@ function getURL(req, res){
 			console.log("get CSV!");
 		});
 	}else if(url == '/anken_search')
-		{//パイソンのプログラムにフォルダ内のデータを探してきてもらう
+		{
 			//console.log("Hello");
 			pyshell = new PythonShell('D:Sotsuken/webapp/search.py');
 			pyshell.send('D:\\Sotsuken\\webapp\\public\\input\\*');
@@ -98,7 +102,7 @@ function getURL(req, res){
 			});
 			
 	}else if(url == '/db_search')
-		{//パイソンのプログラムにフォルダ内のデータを探してきてもらう
+		{//
 			//console.log("Hello");
 			pyshell = new PythonShell('D:Sotsuken/webapp/search.py');
 			pyshell.send('D:\\Sotsuken\\webapp\\public\\sample\\*');
@@ -109,6 +113,21 @@ function getURL(req, res){
 			res.end();
 			});
 			
+	}else if(url == '/anken_up')
+		{//
+			console.log("POST!");
+			var data = '';
+			//POSTデータをうけとる
+			req.on('data', function(chunk){data += chunk}).on('end', function(){
+				console.log(data);
+			//画像を'D:/Sotsuken/webapp/public/input/に保存
+			
+			
+			fs.readFile('D:/Sotsuken/webapp/public/index.html', 'UTF-8',function(err, data){
+				res.writeHead(200, {'Content-Type': 'text/html'});
+				res.write(data);
+				res.end();
+			});
+		});
 	}
-	
 }
