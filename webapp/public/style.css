@@ -5,7 +5,44 @@ body {
   font-family: 'Meiryo UI','Hiragino Kaku Gothic ProN','ヒラギノ角ゴ ProN W3','メイリオ', Meiryo,'Calibri','Andale Mono','Arial',sans-serif;
   background-color:White;
   align:center;
+  margin:0px;
   
+}
+
+a {
+	text-decoration:none;
+	color:white;
+}
+
+.login_bg{
+	background-image: url('/images/login_bg.jpg');
+	background-sizee: cover;
+}
+
+.login {
+  text-align:center;
+  margin:10% 25% 10% 25%;
+  width:50%;
+  background-color:black;
+  border: 1px solid #000;
+  border-radius: 2px;
+  opacity: 0.5;
+}
+
+.login_title{
+	font-family: 'Amatic SC', cursive;
+	color:white;
+	font-size:5ex;
+}
+
+.login_input {
+	margin:4px;
+}
+
+.create_title{
+	font-family: 'Amatic SC', cursive;
+	color:white;
+	font-size:4ex;
 }
 
 h1 {
@@ -97,6 +134,25 @@ button {
   cursor: pointer;
 }
 
+.btn_w {
+  padding: 5px;
+  margin: 4px;
+  background-color: #000;
+  border: 1px solid #ffffff;
+  border-radius: 2px;
+  cursor: pointer;
+  color: #ffffff;
+}
+
+.btn_b {
+  padding: 5px;
+  margin: 4px;
+  background-color: #fff;
+  border: 1px solid #282828;
+  border-radius: 2px;
+  cursor: pointer;
+}
+
 
 #loader-bg {
   display: none;
@@ -124,18 +180,17 @@ button {
 		
 .title_space
 {
+  font-family: 'Cherry Swash', cursive;
   background-color:black;
-  margin-top:-17px;
+  margin-top: 0px;
   margin-bottom:4px;
-  margin-left:-8px;
+  margin-left: 0px;
   margin-right:-20px;
   padding:3px;
-}
-
-#title
-{
   color:white;
 }
+
+
 
 #network {
         background-color:#fffff;
@@ -158,7 +213,7 @@ button {
 
 .name_box
 {
-    padding: 0.4em 0.5em;/*文字の上下 左右の余白*/
+  padding: 0.4em 0.5em;/*文字の上下 左右の余白*/
   color: #494949;/*文字色*/
   background: #f4f4f4;/*背景色*/
   border-left: solid 5px #66cdaa;/*左線*/
@@ -173,4 +228,48 @@ button {
 .inline_box{
   display: inline-block;        /* インラインブロック要素にする */
   vertical-align: top;
+}
+
+#select_context{
+	margin:0em 0em 0em 1em;
+}
+
+.memo_area{
+	align:center;
+	margin:0.5em 0em 0em 1em;
+}
+
+.textbox_title{
+	font-family: cursive;
+	border-radius: 6px;
+	border-bottom: solid 3px #9c9c9c;
+	outline:none;
+}
+
+.textbox {
+  margin-left: 0%;
+  font-family: cursive;
+  border: 1px solid #acacac;
+  border-bottom: solid 3px #7c7c7c;
+  color: #fff;
+  opacity: .7;
+  border-radius: 6px;
+  padding: 0.5em;
+  width: 80%;
+  transition: all .3s;
+  -webkit-transition: all .3s;
+  -moz-transition: all .3s;
+  font-size: 0.8em;
+  outline: none;
+  background-color: #9c9c9c;
+}
+
+.textbox:focus {
+  width: 95%;
+  outline: none;
+}
+
+.right_side{
+	text-align:right;
+	padding-right:5%;
 }

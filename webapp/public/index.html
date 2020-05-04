@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html>
   <head>
+	<link rel="shortcut icon" href='/images/login_bg.jpg' type="image/x-icon">
+
     <link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.css" rel="stylesheet">
   
     <link rel="stylesheet" type="text/css" href="./css/style.css">
@@ -9,8 +11,8 @@
     
 	<script src='./js/jquery.min.js'></script>
 	
-
-
+	<link href="https://fonts.googleapis.com/css?family=Cherry+Swash:700 rel="stylesheet">
+	
     <!--chart.jsを利用-->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.1.4/Chart.min.js"></script>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
@@ -18,26 +20,57 @@
   </head>
   <body>
     <div class="title_space">
-    <p id="title">THEMIS -THeoretical Estimation of Meaning of InSult-</p>
+	<a href="./">
+    　THEMIS -THeoretical Estimation of Meaning of InSult-　　
+	</a>　　 
+	<a href="./login">
+	<button type="button" class="btn_w" name="login" >
+    <font size="1">Login</font>
+    </button>
+	</a>
+	<a href="./logout">
+	<button type="button" class="btn_w" name="logout" >
+    <font size="1">Logout</font>
+    </button>
+	</a>
     </div>
      
 	
 	
 	<div id="wrap">
     <div class="inline_box">
-    <div id="select_context">
-    <form name="select_context">
-    <select name="select_context">
-    <option value="0">All</option>
-    <option value="1">Incision</option>
-    <option value="2">Contusion</option>
-    </select>
-    </form>
-    <button type="button" name="select_context" onclick="app_context()">
-    <font size="1">apply</font>
-    </button>
-    
-    </div>
+	
+	<div class="name_box"><p>Note</p></div>
+	<div class="memo_area">
+	<form method="post" action="./note">
+		<textarea class="textbox_title" id="note_title" name="note_title" rows="1" cols="15" placeholder="Title"></textarea>
+		<textarea class="textbox" id="note" name="note" rows="5" cols="30" placeholder="You can write your note here and save."></textarea>
+		<br>
+		<div class="right_side">
+			<input class="btn_b" type="submit" value="Save">
+		</div>
+	</form>
+	</div>
+	
+	<div class="name_box"><p>Context</p></div>
+		
+	<div id="select_context">
+		<form name="select_context">
+			<select name="select_context">
+				<option value="0">All</option>
+				<option value="1">Incision</option>
+				<option value="2">Contusion</option>
+			</select>
+		</form>
+		
+		<div class="right_side">
+			<button type="button" name="select_context" onclick="app_context()">
+				apply
+			</button>
+		</div>
+	</div>
+	
+	<div class="name_box"><p >Similarity</p></div>
     <!--棒グラフ表示-->
     <canvas id="stage" style="position:relative;　height:40vh; width:80vw"></canvas>
     </div>
@@ -59,8 +92,19 @@
 	
     </div>
     
-    <!--創傷の詳細-->
+    <!--第３セクション-->
     <div class="inline_box">
+	
+	<!--ユーザのログイン情報などを通知-->
+	<div class="name_box"><p>System message</p></div>
+		<div id="user_info">
+		ここにログイン情報が表示されます
+		</div>
+		<div id="sys_info">
+		ここにシステムメッセージが入ります
+		</div>
+		<!--read onlyの情報を表示,更新ボタンとかあるといいかも-->
+	
 	<!--案件データの読み込み-->
 	<div class="name_box"><p id="wound_name">Read Data</p></div>
 	<div id="main_data">
@@ -146,6 +190,53 @@
 	</div>
     
 <script type="text/javascript">
+
+//メインページが呼び出されるとすぐに呼ばれる関数
+window.onload = function(){
+	//cookieを読み込んで”System　Messageに表示”
+	var cookie = document.cookie;//ここにcookieの情報が入る
+	var user = {themis_user_id:'guest', themis_session_id:'none'};//ユーザ情報の初期化
+	var tips = {themis_user_id:'guest', themis_session_id:'none', sys_info:''};//cookieの情報を入れる箱
+	//cookieのデータは辞書型で保存する
+	//他のサイトがつけたCookieと競合しないようにidenticalな名前にした方が良さそう
+	if(cookie != null){
+		var keys = cookie.split('; ');
+		//cookieをfor文で回してuser_idとsessionを回収
+		//順番が前後する可能性があるので，あえて辞書型で収容したほうが良さそう
+		for(var i=0; i < keys.length; i++){
+			var tmp = keys[i].split('=');
+			tips[tmp[0]] = tmp[1];
+			//user[tmp[0]] = tmp[1];//ユーザの情報を入れた
+			//console.log(user);
+		}	
+	}
+	
+	
+	if(tips['themis_user_id'] != ''　|| tips['themis_user_id'] != 'guest'){
+		//もし、ログインしていたらuser名とセッションidを記録
+		user['themis_user_id'] = tips['themis_user_id'];
+		user['themis_session_id'] = tips['themis_session_id'];
+	}
+	
+	
+	//ゲストの名前を表示
+	var user_info = document.getElementById('user_info');
+	user.innerHTML = 'Hello! ';
+	user_info.innerHTML += user['themis_user_id'];
+	user_info.innerHTML += '.';
+	
+	//システムからのメッセ―ジがあれば表示
+	var sys_info = document.getElementById('sys_info');
+	sys_info.innerHTML = '';
+	if(tips['themis_sys_info'] == null || tips['themis_sys_info'] == ''){
+		sys_info.innerHTML = 'There is no message.';
+	}else{
+		sys_info.innerHTML = tips['themis_sys_info'];
+	}
+	
+	
+}
+
 
 //Timelineに関する記述
 var container = document.getElementById("timeline");

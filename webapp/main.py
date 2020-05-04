@@ -688,8 +688,172 @@ def find_wound_COLOR(img):#HSVカラーモデルから重心を探す
 	g_point = np.array([x, y])
 
 	return re_img
+	
+	
+	
+#色の特徴判別の新しい関数
+def rbb(img):
+	red_fet = 0;
+	blue_fet = 0;
+	black_fet = 0;
+	
+	cols = 120 #ヒストグラムの行と列の数
+	
+	img_ori = find_wound_COLOR(img)#傷周辺のみを切り抜いた画像
+	img_Lab = cv.cvtColor(img_ori, cv.COLOR_BGR2Lab)
+	#print(img_Lab)
+	img_L, img_a, img_b = cv.split(img_Lab)
+	
+	#明度の解析
+	img_L = np.ndarray.flatten(img_L)
+	#print(int(mean(img_L.tolist()) / 256 * 100))
+	brightness = int(mean(img_L.tolist()) / 256 * 100)
+	
+	#プロットしてみる
+	img_a = np.ndarray.flatten(img_a)
+	img_b = np.ndarray.flatten(img_b)
+	#print(img_a)
+	hist, aedges, bedges= np.histogram2d(img_a, img_b, bins=cols, range=[[0,255],[0,255]])
+	
+	#print(np.array(hist.tolist()).shape)
+	
+	
+	#一度一次元配列に変換してから二次元での位置を確認する
+	tmp_hist = np.ndarray.flatten(hist)
+	
+	#tmp_histで大きな値を130こもってくる
+	max_list1 = []
+	for i in range(1,30):
+		num = sorted(tmp_hist)[-i]
+		if(num == 0):
+			continue
+			
+		indexes = [j for j, z in enumerate(tmp_hist) if z == num]
+		
+		for place in indexes:
+			x = int(place / cols)
+			y = place % cols
+		
+			max_list1.append(np.array([x, y]))
+		
+	
+	#print(max_list1)
+	
+	
+	#hist_list = hist.tolist()
+	#max_list = max(hist_list)
+	#m = max(max_list)
+	
+	#ヒストグラムで一番多きいところの座標を習得 : hist[y][x]
+	#x = hist_list.index(max(hist_list))
+	#y = max_list.index(m)
+	
+	saturations = []
+	degs=[]
+	for val in max_list1:
+		x = val[0]
+		y = val[1]
+	
+		#原点が（cols/2,cols / 2）担っているのでこれを（0,0）にシフトし、赤を0度として角度で色情報を付与
+		x -= int(cols / 2)
+		y -= int(cols / 2)
+		r = math.sqrt(x**2 + y**2)
+		cos = x / r
+		sin = y / r
+		r = int(r)
+		#print(r)
+		#print(math.degrees(math.acos(cos)))
+		#print(math.degrees(math.asin(sin)))
+		deg = math.degrees(math.acos(cos))
+		
+		
+		if(math.degrees(math.asin(sin)) < 0):#yがマイナスなら下半分
+			deg = -1 * math.fabs(deg)
+			degs.append(deg)
+		
+		#明度をもとにBlackかどうか決める（本当は照明条件を考えないといけないので、とりあえず今回は真ん中で区切る）
+		if(brightness >= 50):
+			black_fet = 1;
+		
+		
+	
+	#色の判定(青か赤が存在するかだけ判定)
+	color_list = []	
+	for deg in degs:	
+		if(-29 < deg and deg <= 83):#赤紫から赤黄色まで
+			red_fet = 1
+		
+		elif(-65 >= deg and deg > -155):
+			blue_fet = 1
+		
+		elif(-29 >= deg and deg > -65):
+			red_fet = 1
+			blue_fet = 1
+	
+	#print(list(set(color_list)))
+	
+	#img = cv.imread(hist)
+	#cv.imshow()
 
-#画像を読み込んでLab空間に変換
+	#histに64*64のマスに値が入ってます
+	plt.figure()
+	sns.heatmap(hist, cmap="binary_r")
+	plt.title("Histgram 2D")
+	plt.xlabel("a*")
+	plt.ylabel("b*")
+	plt.savefig('D:\Sotsuken\webapp\\public\\tmp\\heat_map')
+	
+	
+
+	#x,y座標を３Dの形式に変換
+	#apos, bpos = np.meshgrid(aedges[:-1], bedges[:-1])
+	#zpos = 0#zは０を始点にする
+
+	#x,y座標の幅を指定
+	#da = apos[0][1] - apos[0][0]
+	#db = bpos[1][0] - bpos[0][0]
+	#dz = hist.ravel()
+
+	#x,yを３Dの形に変換
+	#apos = apos.ravel()
+	#bpos = bpos.ravel()
+
+	#３D描画
+	#fig = plt.figure()#描画領域の作成
+	#aa = fig.add_subplot(111, projection="3d")
+	#aa.bar3d(apos, bpos, zpos, da, db, dz, cmap=cm.hsv)#ヒストグラムを３D空間に表示
+	#plt.title("Histgram 2D")
+	#plt.xlabel("a*")
+	#plt.ylabel("b*")
+	#aa.set_zlabel("Z")
+	#plt.show()
+
+	src1 = cv.imread('D:\Sotsuken\webapp\\public\\tmp\\heat_map.png')
+	src2 = cv.imread('D:\Sotsuken\webapp\\public\\tmp\\Lab2.jpg')
+	#cv.imshow('src', src1)
+	cv.rectangle(src1, (70, 50), (490, 440), (255, 0, 255), thickness=8, lineType=cv.LINE_4)
+
+	rect = (80,58, 397, 368)
+	src1 = src1[ rect[1] : rect[1] + rect[3], rect[0] : rect[0] + rect[2]]
+	#色の表示系がずれているので回転
+	src1 = cv.rotate(src1, cv.ROTATE_90_COUNTERCLOCKWISE)
+
+	src1 = cv.resize(src1, src2.shape[1::-1])
+	dst = cv.addWeighted(src1, 0.5, src2, 0.5, 0)
+
+	#cv.imshow('result.jpg', dst)
+	#cv.waitKey()
+	
+	
+	return red_fet, blue_fet, black_fet, dst
+	
+	
+
+	
+	
+	
+
+#100次元になってるので一旦使わない・画像を読み込んでLab空間に変換
 def toLab(img):
 	cols = 120 #ヒストグラムの行と列の数
 	
@@ -902,8 +1066,12 @@ def toLab(img):
 	#cv.imshow('result.jpg', dst)
 	#cv.waitKey()
 	return list(set(color_list)), dst
-	
-def color_judge(color_list):
+
+
+
+
+#100種類も色があるので、これは一旦使わない(この関数はカラーリストからベクトルを作る関数)
+def color_judge1(color_list):
 	palette = [0]*100
 
 	for color in color_list:
@@ -992,6 +1160,7 @@ def color_judge(color_list):
 		palette[num3] = 1
 		
 	return palette
+	
 
 
 
@@ -1230,6 +1399,10 @@ def judge(id, img):
 	openness = 0
 	non_openness = 0
 	
+	red_fet = 0
+	blue_fet = 0
+	black_fet = 0
+	
 	detect_figure(img)
 	detect_edge(img)
 	
@@ -1246,9 +1419,9 @@ def judge(id, img):
 	oval = oval_judge(img)
 	
 	#色の判定
-	color_list, color_hist_img = toLab(img)
-	palette = color_judge(color_list)
-	
+	red_fet, blue_fet, black_fet, color_hist_img = rbb(img)
+	#color_list, color_hist_img = toLab(img)
+	#color_judge()
 	#print("創端鋭利："+str(end_sharp)+"　創端太："+str(end_thick)+" 創縁不整："+str(edge_irregular)+" 創縁直線："+str(edge_straight)+"　円度："+ str(oval)
 	#+"　開放性："+ str(openness)+"　非開放性："+ str(non_openness))
 	
@@ -1267,15 +1440,12 @@ def judge(id, img):
 	if(edge_straight == 1):
 		edge_irregular = 0
 	
-	result = [end_sharp,end_thick,edge_irregular,edge_straight,oval,openness,non_openness]
+	result = [end_sharp,end_thick,edge_irregular,edge_straight,oval,openness,non_openness, red_fet, blue_fet, black_fet]
 	
-	#色情報と合成
-	result.extend(palette)
 	
 	
 	#辞書作成
-	data = {'original_img' : path1, 'edge_img':path2,
-				'color_hist_img':path3, 'color': color_list}
+	data = {'original_img' : path1, 'edge_img':path2,'color_hist_img':path3}
 
 
 	
@@ -1596,14 +1766,16 @@ def sem_projection(sem_mat, data, contex_vec_list):#dataはデータベースに
 def mmm_operation(path, anken_path):
 	#案件のデータを処理
 	input_vec = np.array(anken_read_img(anken_path)).flatten()
-
+	
+	#データベースのデータを処理
 	results = read_img(path)
 	#data_listhは画像のパスまで入っている
 	#resultsは単純にベクトルのみ
 	#print(data_list)
 	
 	#word_listに色追加しなくちゃいけない、、、。
-	word_list = ["end_sharp","end_thick","edge_irregular","edge_straight","oval","openness","non_openness"]
+	word_list = ["end_sharp","end_thick","edge_irregular","edge_straight","oval","openness","non_openness","red","blue","black"]
+	#print(results)
 	sem_mat = make_semantic_matrix(results)
 	#sem_data = cl.OrderedDict()
 	
@@ -1615,8 +1787,8 @@ def mmm_operation(path, anken_path):
 			writer.writerow(row)
 	
 	#まずすべての文脈において距離計算
-	word_list = ["end_sharp","end_thick","edge_irregular","edge_straight","oval","openness","non_openness"]
-	contex_word = [["end_sharp","end_thick","edge_irregular","edge_straight","oval","openness","non_openness"]]
+	#word_list = ["end_sharp","end_thick","edge_irregular","edge_straight","oval","openness","non_openness"]
+	contex_word = [["end_sharp","end_thick","edge_irregular","edge_straight","oval","openness","non_openness","red","blue","black"]]
 	
 	#文脈の種類を作成
 	contex_list = []

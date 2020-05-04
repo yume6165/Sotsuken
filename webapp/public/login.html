@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<link rel="stylesheet" type="text/css" href="./css/style_login.css">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+	<link href="https://fonts.googleapis.com/css?family=Amatic+SC:700 rel="stylesheet">
+</head>
+
+<body>
+	<div class="title_space">
+	<a href="./">
+	    　THEMIS -THeoretical Estimation of Meaning of InSult-　　　　
+	</a>
+	<a href="./create_new">
+	<button type="button" class="btn_w" name="new" value="Create new account">
+    <font size="1">New account</font>
+    </button>
+	</a>
+    </div>
+	
+	<div class="login">
+		<p class="login_title">Login</p>
+		<form method="POST" action="./login_user">
+			<input type="text" class="login_input" name="login_name" size="10" maxlength="10" placeholder="Name">
+			<br>
+			<input type="password" class="login_input" name="login_pass" size="10" maxlength="8" placeholder="Pass Word">
+			<br>
+			<input type="submit" class="btn_w" value="Enter">
+			<br>
+		</form>
+	</div>
+</body>
+
+</html>
