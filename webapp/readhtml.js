@@ -9,7 +9,7 @@ pyshell.on('message', function(data){
 	console.log(data);
 	console.log('finish');
 })
-//console.log("pythonの実行切ってる");
+console.log("pythonの実行切ってる");
 
 
 //１:モジュールのロード

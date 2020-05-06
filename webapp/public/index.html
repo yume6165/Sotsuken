@@ -396,20 +396,21 @@ function csvToArray(path) {
       //類似度を入力
       distance = [];
       distances = [];
-      distances.push(csvToArray("./result/output_file/anken_dist/0_no_context.csv"));
+      distances.push(csvToArray("https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2F0_no_context.csv?v=1588775572986"));
 	  //console.log(distances)
       //distances.push(distance);
-      distances.push(csvToArray("https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2F1_incision_context.csv?v=1580197280693"));
+      distances.push(csvToArray("https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2F1_incision_context.csv?v=1588775573042"));
       //distances.push(distance);
-      distances.push(csvToArray("https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2F2_contusion_context.csv?v=1580197280719"));
+	  //console.log(distances)
+	  distances.push(csvToArray("https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2F2_contusion_context.csv?v=1588776093764"));
       //distances.push(distance);
       //console.log(distances)
       
       
       //画像データを読み込み
       img_info = [];
-      img_info.push(csvToArray("https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2Fimg_infos.csv?v=1581089085901"));
-      
+      img_info.push(csvToArray("https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2Fimg_infos.csv?v=1588777708183"));
+      console.log(img_info);
 	  //余分な配列を削除する
       //console.log(img_info[0]);
       //for(var i=0; i < Math.floor((img_info[0].length) / 2)+1; i++)
@@ -421,13 +422,12 @@ function csvToArray(path) {
       
       //画像のベクトルを読み込み
       img_vec = [];
-      img_vec.push(csvToArray("https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2Fimg_vec.csv?v=1581088250439"));
+      img_vec.push(csvToArray("https://cdn.glitch.com/a71c879d-dcf2-41d9-accb-3bac81f35ea0%2Fimg_vec.csv?v=1588775556679"));
       console.log(img_vec);
       
       //console.log(distances);
       c_num = distances.length;
       i_num = distances[0].length;
-      
       
       
       
@@ -449,6 +449,7 @@ function csvToArray(path) {
       
       //重みの計算（文字列から数字に変換）
       w_list = [];//全体まとめる
+	  //console.log(distance);
       for(var k=0; k < c_num; k++)
       {
         w_context_list=[];//コンテクストごと
@@ -614,7 +615,7 @@ function sort_data(w, index, context)
             w = Number(distances[k][i][j]);
             //console.log(distances[0][k][i][j]);
             var w_tmp = 1 / w;
-            w = 3 / w;
+            w = 1 / 3 / w;
             
             //console.log(w_max);
             
@@ -709,6 +710,7 @@ function sort_data(w, index, context)
           var wound_ori_img = document.getElementById("wound_ori_img");
           var wound_edge_img = document.getElementById("wound_edge_img");
           var wound_color_map = document.getElementById("wound_color_map");
+		  //console.log(img_info[0][nodeId][0]);
           wound_ori_img.src = img_info[0][nodeId][0];
           wound_edge_img.src = img_info[0][nodeId][1];
           wound_color_map.src = img_info[0][nodeId][2];

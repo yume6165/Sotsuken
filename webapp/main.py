@@ -144,7 +144,7 @@ def detect_figure(img):#重心を使って最短辺から最長辺を求める
 			
 		else:#y方向に大きいとき
 			long_axi = rect[3]
-			short_axi = recr[2]
+			short_axi = rect[2]
 			max_point1 = np.array([g_point[0],rect[1]])
 			max_point2 = np.array([g_point[0],rect[1] + rect[3]])
 			min_point1 = np.array([rect[0] ,g_point[1]])
@@ -176,7 +176,7 @@ def detect_figure(img):#重心を使って最短辺から最長辺を求める
 				y = g_point[1] - i
 			
 				if(y < 0 or y >= tmp_img.shape[0]-1):
-					contnue
+					continue
 				elif(tmp_img[y][x].tolist() == 255 or tmp_img[y + 1][x].tolist() == 255 or tmp_img[y - 1][x].tolist() == 255):#エッジ（白）ならば,幅は３
 					tmp_point = np.array([x, y])#ベクトルを保存
 					min_point2 = tmp_point
@@ -218,7 +218,7 @@ def detect_figure(img):#重心を使って最短辺から最長辺を求める
 				if(x >= tmp_img.shape[1] + 1):
 					continue
 				elif(y < 0 or y >= tmp_img.shape[0] + 2):
-					contnue
+					continue
 				elif(tmp_img[y][x].tolist() == 255 or tmp_img[y][x + 1].tolist() == 255 or tmp_img[y][x - 1].tolist() == 255):#エッジ（白）ならば,幅は３
 					tmp_point = np.array([x, y])#ベクトルを保存
 					min_point2 = tmp_point
@@ -1428,9 +1428,9 @@ def judge(id, img):
 	
 	#画像データをまとめる(画像は書き出してパスをわたすことにした)
 	result_path = 'D:Sotsuken\\webapp\\public\\result\\'
-	path1 = str(result_path)+ 'original_img\\ori_img_' + str(id) + '.jpg'
-	path2 = str(result_path)+ 'edge_img\\edge_img_'+str(id)+'.jpg'
-	path3 = str(result_path)+ 'color_hist_img\\color_hist_img_'+str(id)+'.jpg'
+	path1 = '.\\result\\original_img\\ori_img_' + str(id) + '.jpg'
+	path2 = '.\\result\\edge_img\\edge_img_'+str(id)+'.jpg'
+	path3 = '.\\result\\color_hist_img\\color_hist_img_'+str(id)+'.jpg'
 	
 	cv.imwrite(path1, img)
 	cv.imwrite(path2, edge_img)
@@ -1463,7 +1463,7 @@ def read_img(folder):#フォルダを指定して
 		#print(file)
 		img = cv.imread(file, cv.IMREAD_COLOR)
 		#sharp, oval, pull, push = judge(img)
-		#print("データベースよみこみ！！！！！！！！"+str(id))
+		print("Start!!!!!!!!!"+str(id))
 		result, data = judge(id, img)
 		data_list.append(data)
 		results.append(result)
